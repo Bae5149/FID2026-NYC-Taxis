@@ -1,0 +1,9 @@
+# Datos y resultados locales
+data/
+*.duckdb
+
+# Artefactos de dbt, los genera dbt y no se versionan nunca
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt_modules/  # legado, pero inofensivo
