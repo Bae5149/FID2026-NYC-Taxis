@@ -7,3 +7,9 @@ dbt/target/
 dbt/dbt_packages/
 dbt/logs/
 dbt_modules/  # legado, pero inofensivo
+data/
+*.duckdb
+*.duckdb.wal
+.venv/
+__pycache__/
+.pytest_cache/
