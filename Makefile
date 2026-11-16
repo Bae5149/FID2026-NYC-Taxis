@@ -10,14 +10,11 @@ MES ?= 2025-03
 
 all: install ingesta
 
-install: $(VENV)
-
-$(VENV): $(REQUIREMENTS)
-	@echo "Creando entorno virtual..."
-	$(PYTHON) -m venv $(VENV)
-	$(VENV_PIP) install --upgrade pip
-	@echo "Instalando dependencias desde $(REQUIREMENTS)..."
-	$(VENV_PIP) install -r $(REQUIREMENTS)
+install:
+	@test -d $(VENV) || $(PYTHON) -m venv $(VENV)
+	@$(VENV_PIP) install --upgrade pip
+	@$(VENV_PIP) install -r $(REQUIREMENTS)
+	@echo "Dependencias listas en $(VENV)/"
 
 ingesta: install
 	@echo "Ejecutando ingesta para el mes $(MES)..."
