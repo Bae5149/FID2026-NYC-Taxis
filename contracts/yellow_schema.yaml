@@ -1,0 +1,43 @@
+version: "1.0"
+table: yellow_tripdata
+columns:
+  - name: vendor_id
+    type: BIGINT
+  - name: tpep_pickup_datetime
+    type: TIMESTAMP
+  - name: tpep_dropoff_datetime
+    type: TIMESTAMP
+  - name: passenger_count
+    type: BIGINT
+  - name: trip_distance
+    type: DOUBLE
+  - name: ratecode_id
+    type: BIGINT
+  - name: store_and_fwd_flag
+    type: VARCHAR
+  - name: pu_location_id
+    type: BIGINT
+  - name: do_location_id
+    type: BIGINT
+  - name: payment_type
+    type: BIGINT
+  - name: fare_amount
+    type: DOUBLE
+  - name: extra
+    type: DOUBLE
+  - name: mta_tax
+    type: DOUBLE
+  - name: tip_amount
+    type: DOUBLE
+  - name: tolls_amount
+    type: DOUBLE
+  - name: improvement_surcharge
+    type: DOUBLE
+  - name: total_amount
+    type: DOUBLE
+  - name: congestion_surcharge
+    type: DOUBLE
+  - name: airport_fee
+    type: DOUBLE
+  - name: cbd_congestion_fee
+    type: DOUBLE
