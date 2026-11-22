@@ -1,0 +1,104 @@
+version: "1.0"
+tabla_destino: "yellow_tripdata"
+
+columnas:
+  - origen: "VendorID"
+    destino: "vendor_id"
+    tipo: "INTEGER"
+    obligatorio: true
+
+
+  - origen: "tpep_pickup_datetime"
+    destino: "tpep_pickup_datetime"
+    tipo: "TIMESTAMP"
+    obligatorio: true
+
+  - origen: "tpep_dropoff_datetime"
+    destino: "tpep_dropoff_datetime"
+    tipo: "TIMESTAMP"
+    obligatorio: true
+
+  - origen: "passenger_count"
+    destino: "passenger_count"
+    tipo: "BIGINT"
+    obligatorio: false
+
+  - origen: "trip_distance"
+    destino: "trip_distance"
+    tipo: "DOUBLE"
+    obligatorio: true
+
+  - origen: "RatecodeID"
+    destino: "ratecode_id"
+    tipo: "BIGINT"
+    obligatorio: false
+
+  - origen: "store_and_fwd_flag"
+    destino: "store_and_fwd_flag"
+    tipo: "VARCHAR"
+    obligatorio: false
+
+  - origen: "PULocationID"
+    destino: "pu_location_id"
+    tipo: "INTEGER"
+    obligatorio: true
+
+  - origen: "DOLocationID"
+    destino: "do_location_id"
+    tipo: "INTEGER"
+    obligatorio: true
+
+  - origen: "payment_type"
+    destino: "payment_type"
+    tipo: "BIGINT"
+    obligatorio: true
+
+  - origen: "fare_amount"
+    destino: "fare_amount"
+    tipo: "DOUBLE"
+    obligatorio: true
+
+  - origen: "extra"
+    destino: "extra"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "mta_tax"
+    destino: "mta_tax"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "tip_amount"
+    destino: "tip_amount"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "tolls_amount"
+    destino: "tolls_amount"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "improvement_surcharge"
+    destino: "improvement_surcharge"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "total_amount"
+    destino: "total_amount"
+    tipo: "DOUBLE"
+    obligatorio: true
+
+  - origen: "congestion_surcharge"
+    destino: "congestion_surcharge"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "Airport_fee"
+    destino: "airport_fee"
+    tipo: "DOUBLE"
+    obligatorio: false
+
+  - origen: "cbd_congestion_fee"
+    destino: "cbd_congestion_fee"
+    tipo: "DOUBLE"
+    obligatorio: false 
