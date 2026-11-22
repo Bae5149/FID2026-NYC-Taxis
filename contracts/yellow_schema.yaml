@@ -4,7 +4,7 @@ tabla_destino: "yellow_tripdata"
 columnas:
   - origen: "VendorID"
     destino: "vendor_id"
-    tipo: "INTEGER"
+    tipo: "BIGINT"
     obligatorio: true
 
 
@@ -40,12 +40,12 @@ columnas:
 
   - origen: "PULocationID"
     destino: "pu_location_id"
-    tipo: "INTEGER"
+    tipo: "BIGINT"
     obligatorio: true
 
   - origen: "DOLocationID"
     destino: "do_location_id"
-    tipo: "INTEGER"
+    tipo: "BIGINT"
     obligatorio: true
 
   - origen: "payment_type"
