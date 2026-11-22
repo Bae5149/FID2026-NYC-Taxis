@@ -1,21 +1,29 @@
+<div align="center">
+
 # Pipeline de Ingeniería de Datos — NYC Yellow Taxi (TLC)
 
 Proyecto académico de ingeniería de datos orientado a la comparación interanual de dos meses del dataset oficial de **NYC Yellow Taxi Trip Records (TLC)**, ejecutado sobre una máquina virtual **Debian (4 vCPU, 8 GB RAM)** con un stack eficiente en memoria (**dlt, dbt, DuckDB, Dagster, Python y observabilidad liviana**).
+
+### Integrantes
+
+| Columna 1 | Columna 2 |
+| :---: | :---: |
+| **Jeremias Benjamin Pomares Paz** — Legajo: `58008` | **Ana Carolina Samana Baena** — Legajo: `57944` |
 
 ---
 
 ## Tabla de Contenidos
 
-1. [Arquitectura y Stack Tecnológico](#arquitectura-y-stack-tecnológico)
-2. [Estructura del Repositorio](#estructura-del-repositorio)
-3. [Instalación y Ejecución](#instalación-y-ejecución)
-4. [Etapas del Pipeline](#etapas-del-pipeline)
-5. [Decisiones Técnicas y de Negocio](#decisiones-técnicas-y-de-negocio)
-6. [Calidad de Datos y Cuarentena](#calidad-de-datos-y-cuarentena)
-7. [Modelado Dimensional (Esquema Estrella)](#modelado-dimensional-esquema-estrella)
-8. [Rendimiento y Recursos](#rendimiento-y-recursos)
-9. [Limitaciones Conocidas](#limitaciones-conocidas)
-10. [Declaración de Uso de IA](#declaración-de-uso-de-ia)
+[Arquitectura y Stack Tecnológico](#arquitectura-y-stack-tecnológico) •
+[Estructura del Repositorio](#estructura-del-repositorio) •
+[Instalación y Ejecución](#instalación-y-ejecución) •
+[Etapas del Pipeline](#etapas-del-pipeline) •
+[Decisiones Técnicas y de Negocio](#decisiones-técnicas-y-de-negocio) •
+[Calidad de Datos y Cuarentena](#calidad-de-datos-y-cuarentena) •
+[Modelado Dimensional (Esquema Estrella)](#modelado-dimensional-esquema-estrella) •
+[Rendimiento y Recursos](#rendimiento-y-recursos) •
+[Limitaciones Conocidas](#limitaciones-conocidas) •
+[Declaración de Uso de IA](#declaración-de-uso-de-ia)
 
 ---
 
@@ -43,12 +51,18 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 ```
 
 ### Herramientas Seleccionadas
-* **Ingesta (`dlt` - data load tool):** Manejo declarativo de fuentes, reintentos automáticos con *backoff*, estado de cargas e idempotencia, conservando los archivos crudos intactos y registrando metadatos (`load_info` e `ingestion_log`).
-* **Motor Analítico y Almacenamiento (`DuckDB` + `Parquet`):** Procesamiento columnar *in-process* de alto rendimiento con límites explícitos de memoria (`memory_limit`) para evitar desbordamientos en entornos de 8 GB RAM.
-* **Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción del esquema estrella.
-* **Orquestación (`Dagster` + `dagster-dbt`):** Definición de *Software-Defined Assets*, control de dependencias, reintentos, logs centralizados por corrida y seguimiento de metadatos (`MaterializeResult`).
-* **Observabilidad Liviana (`Dagster UI` + `Evidence.dev` / `Dozzle`):** Monitoreo de corridas, dashboards históricos en SQL sobre archivos estáticos y visualización de logs de contenedores con bajo consumo de memoria en reposo.
-* **Entorno Reproducible (`Docker` + `code-server`):** Contenerización de servicios para despliegue portable y acceso remoto al entorno de desarrollo.
+
+**Ingesta (`dlt` - data load tool):** Manejo declarativo de fuentes, reintentos automáticos con *backoff*, estado de cargas e idempotencia, conservando los archivos crudos intactos y registrando metadatos (`load_info` e `ingestion_log`).
+
+**Motor Analítico y Almacenamiento (`DuckDB` + `Parquet`):** Procesamiento columnar *in-process* de alto rendimiento con límites explícitos de memoria (`memory_limit`) para evitar desbordamientos en entornos de 8 GB RAM.
+
+**Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción del esquema estrella.
+
+**Orquestación (`Dagster` + `dagster-dbt`):** Definición de *Software-Defined Assets*, control de dependencias, reintentos, logs centralizados por corrida y seguimiento de metadatos (`MaterializeResult`).
+
+**Observabilidad Liviana (`Dagster UI` + `Evidence.dev` / `Dozzle`):** Monitoreo de corridas, dashboards históricos en SQL sobre archivos estáticos y visualización de logs de contenedores con bajo consumo de memoria en reposo.
+
+**Entorno Reproducible (`Docker` + `code-server`):** Contenerización de servicios para despliegue portable y acceso remoto al entorno de desarrollo.
 
 ---
 
@@ -81,11 +95,11 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 ## Instalación y Ejecución
 
 ### Requisitos Previos
-* **Python:** `3.11` o superior.
-* **Make** y **Docker / Docker Compose**.
-* **Hardware recomendado:** 4 núcleos CPU y 8 GB de RAM.
+
+**Python:** `3.11` o superior. • **Make** y **Docker / Docker Compose**. • **Hardware recomendado:** 4 núcleos CPU y 8 GB de RAM.
 
 ### 1. Configuración Local
+
 ```bash
 git clone <URL_DEL_REPOSITORIO>
 cd FID2026-NYC-Taxis
@@ -97,9 +111,11 @@ pip install -r requirements.txt
 ```
 
 ### 2. Ejecución Completa (Comando Único)
+
 ```bash
 make all MES=2025-03
 ```
+
 Este comando ejecuta secuencialmente:
 1. Levantamiento de servicios de apoyo y ejecución del pipeline para el mes indicado y su comparación con 2024.
 2. Ingesta idempotente mediante `dlt` y auditoría de esquema contra `contracts/yellow_schema.yaml`.
@@ -107,6 +123,7 @@ Este comando ejecuta secuencialmente:
 4. Generación de la capa curada particionada y tablas del modelo estrella.
 
 ### 3. Ejecución de Tests Automatizados
+
 ```bash
 make test MES=2025-03
 ```
@@ -126,19 +143,25 @@ make test MES=2025-03
 ## Decisiones Técnicas y de Negocio
 
 ### Manejo de Evolución de Esquema (`cbd_congestion_fee` y columnas nuevas)
-* **Tratamiento de `cbd_congestion_fee` en 2024:** Este cargo entró en vigor en enero de 2025, por lo que no existe en los archivos de 2024. En los datos de 2024 se inyecta explícitamente casteado a `DOUBLE` con valor `NULL` (no `0.0`), evitando distorsionar métricas históricas o confundir ausencia de impuesto con viajes exentos.
-* **Columnas nuevas no contempladas en el contrato:** Se registra una advertencia (`WARNING`) en los logs indicando nombre y tipo de la columna desconocida, y se excluye de la proyección hacia *staging* hasta que el contrato YAML sea actualizado de forma explícita.
+
+**Tratamiento de `cbd_congestion_fee` en 2024:** Este cargo entró en vigor en enero de 2025, por lo que no existe en los archivos de 2024. En los datos de 2024 se inyecta explícitamente casteado a `DOUBLE` con valor `NULL` (no `0.0`), evitando distorsionar métricas históricas o confundir ausencia de impuesto con viajes exentos.
+
+**Columnas nuevas no contempladas en el contrato:** Se registra una advertencia (`WARNING`) en los logs indicando nombre y tipo de la columna desconocida, y se excluye de la proyección hacia *staging* hasta que el contrato YAML sea actualizado de forma explícita.
 
 ### Tipado de Datos en el Contrato (`contracts/yellow_schema.yaml`)
-* **Identificadores y códigos categóricos (`BIGINT`):** `vendor_id`, `ratecode_id`, `passenger_count`, `pu_location_id`, `do_location_id` y `payment_type` representan códigos enteros discretos según el diccionario oficial de la TLC y se castean explícitamente a `BIGINT`.
-* **Métricas financieras y de distancia (`DOUBLE`):** `trip_distance`, `fare_amount`, `tip_amount`, `total_amount` y recargos se definen como `DOUBLE`.
-* **Banderas (`VARCHAR`) y Fechas (`TIMESTAMP`):** `store_and_fwd_flag` se define como `VARCHAR` por compatibilidad nativa con Parquet (que no posee `CHAR(1)` fijo), y las marcas de tiempo se mantienen como `TIMESTAMP`.
+
+**Identificadores y códigos categóricos (`BIGINT`):** `vendor_id`, `ratecode_id`, `passenger_count`, `pu_location_id`, `do_location_id` y `payment_type` representan códigos enteros discretos según el diccionario oficial de la TLC y se castean explícitamente a `BIGINT`.
+
+**Métricas financieras y de distancia (`DOUBLE`):** `trip_distance`, `fare_amount`, `tip_amount`, `total_amount` y recargos se definen como `DOUBLE`.
+
+**Banderas (`VARCHAR`) y Fechas (`TIMESTAMP`):** `store_and_fwd_flag` se define como `VARCHAR` por compatibilidad nativa con Parquet (que no posee `CHAR(1)` fijo), y las marcas de tiempo se mantienen como `TIMESTAMP`.
 
 ### Reprocesamiento Idempotente por Partición
+
 Al reprocesar un mes (`MES=AAAA-MM`), únicamente se actualiza la partición física correspondiente (`year=AAAA/month=MM/`), manteniendo intactos los demás meses almacenados.
 
 | Partición | Conteo Antes del Reproceso | Conteo Después del Reproceso | Estado |
-| :--- | :---: | :---: | :---: |
+| :---: | :---: | :---: | :---: |
 | `year=2024/month=MM` | *(Completar con corrida real)* | *(Idéntico)* | Intacta |
 | `year=2025/month=MM` | *(Completar con corrida real)* | *(Idéntico)* | Reprocesada sin duplicados |
 
@@ -149,7 +172,7 @@ Al reprocesar un mes (`MES=AAAA-MM`), únicamente se actualiza la partición fí
 Se implementaron **8 reglas de calidad**. La reconciliación final aborta el pipeline si `filas_leidas != filas_aceptadas + filas_cuarentena`.
 
 | ID Regla | Descripción | Severidad | Umbral / Condición Justificada |
-| :--- | :--- | :--- | :--- |
+| :---: | :--- | :---: | :--- |
 | `DQ_01` | Fecha de subida fuera del mes del archivo | `Rechazo` | `DATE_TRUNC('month', tpep_pickup_datetime)` distinto al mes procesado. Evita contaminación entre períodos. |
 | `DQ_02` | Bajada anterior o igual a la subida | `Rechazo` | `tpep_dropoff_datetime <= tpep_pickup_datetime`. Físicamente imposible; invalida la duración. |
 | `DQ_03` | Distancia inválida o extrema | `Rechazo` | `trip_distance <= 0` o `trip_distance > 200` millas. Descarta viajes sin desplazamiento o errores de taxímetro fuera del área metropolitana de NYC. |
@@ -163,20 +186,27 @@ Se implementaron **8 reglas de calidad**. La reconciliación final aborta el pip
 
 ## Modelado Dimensional (Esquema Estrella)
 
-* **`fact_trips`:** Un viaje individual válido (aceptado) de taxi amarillo registrado por la TLC, con clave subrogada derivada de sus atributos naturales.
-* **`dim_zone`:** Una zona geográfica oficial de taxi de Nueva York (`location_id`), con `borough`, `zone` y `service_zone`.
-* **`dim_date`:** Una fecha calendario única (`date_key`), con atributos de año, mes, día, día de la semana e indicador de fin de semana.
-* **`agg_zone_hour`:** Una combinación única de zona de origen (`pu_location_id`), fecha y hora del día (`0-23`), con cantidad de viajes, ingreso total y duración promedio en minutos.
+**`fact_trips`:** Un viaje individual válido (aceptado) de taxi amarillo registrado por la TLC, con clave subrogada derivada de sus atributos naturales.
+
+**`dim_zone`:** Una zona geográfica oficial de taxi de Nueva York (`location_id`), con `borough`, `zone` y `service_zone`.
+
+**`dim_date`:** Una fecha calendario única (`date_key`), con atributos de año, mes, día, día de la semana e indicador de fin de semana.
+
+**`agg_zone_hour`:** Una combinación única de zona de origen (`pu_location_id`), fecha y hora del día (`0-23`), con cantidad de viajes, ingreso total y duración promedio en minutos.
 
 ---
 
 ## Rendimiento y Recursos
 
-* **Entorno:** VM Debian — 4 núcleos CPU / 8 GB RAM.
-* **Control de memoria:** Límites explícitos de memoria en contenedores (`mem_limit`), `dlt` con un worker y buffers acotados, `dbt` con `--threads 1` y `DuckDB` con `memory_limit` controlado.
-* **Concurrencia DuckDB:** Separación de datos/métricas y ejecución secuencial para evitar conflictos de escritura concurrente.
-* **Tiempo total de ejecución (`make all`):** *(Completar tras ejecutar la corrida de los dos meses en tu VM)*.
-* **Pico máximo de consumo de RAM:** *(Completar midiendo con `/usr/bin/time -v` o `docker stats`)*.
+**Entorno:** VM Debian — 4 núcleos CPU / 8 GB RAM.
+
+**Control de memoria:** Límites explícitos de memoria en contenedores (`mem_limit`), `dlt` con un worker y buffers acotados, `dbt` con `--threads 1` y `DuckDB` con `memory_limit` controlado.
+
+**Concurrencia DuckDB:** Separación de datos/métricas y ejecución secuencial para evitar conflictos de escritura concurrente.
+
+**Tiempo total de ejecución (`make all`):** *(Completar tras ejecutar la corrida de los dos meses en tu VM)*.
+
+**Pico máximo de consumo de RAM:** *(Completar midiendo con `/usr/bin/time -v` o `docker stats`)*.
 
 ---
 
@@ -195,3 +225,5 @@ Se declara el uso de inteligencia artificial (**Gemini**) como herramienta de ap
 * Redacción inicial de plantillas, estructuras de validación y documentación técnica.
 
 Todo el código, reglas de calidad, pruebas y consultas SQL fueron revisados, adaptados y validados por el autor del proyecto.
+
+</div>
