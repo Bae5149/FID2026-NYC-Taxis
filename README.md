@@ -5,13 +5,13 @@
 Proyecto académico de ingeniería de datos orientado a la comparación interanual de dos meses del dataset oficial de **NYC Yellow Taxi Trip Records (TLC)**, ejecutado sobre una máquina virtual **Debian (4 vCPU, 8 GB RAM)** con un stack eficiente en memoria (**dlt, dbt, DuckDB, Dagster, Python y observabilidad liviana**).
 
 ### Integrantes
-    <div align="center">
-    | Nombre | Lejago |
-    | :---: | :---: |
-    | **Jeremias Benjamin Pomares Paz** | Legajo: `58008` |
-    | **Ana Carolina Samana Baena** | Legajo: `57944`|
-    ---
-    </div>
+    
+| Nombre | Lejago |
+| :---: | :---: |
+| **Jeremias Benjamin Pomares Paz** | Legajo: `58008` |
+| **Ana Carolina Samana Baena** | Legajo: `57944`|
+---
+    
 ## Tabla de Contenidos
 
 [Arquitectura y Stack Tecnológico](#arquitectura-y-stack-tecnológico) •
