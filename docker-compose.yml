@@ -1,0 +1,88 @@
+name: nyc_taxi
+
+x-logging: &logging            # evita que los logs crezcan sin límite en disco
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # --- SIEMPRE ENCENDIDOS (consumo mínimo) ---
+
+  web:                          # sirve el sitio estático de Evidence
+    image: nginx:1.27-alpine
+    container_name: evidence_web_nyc
+    ports:
+      - "127.0.0.1:3000:80"     # solo accesible desde tu PC
+    volumes:
+      - site:/usr/share/nginx/html:ro
+    mem_limit: 32m
+    restart: unless-stopped
+    logging: *logging
+
+  dozzle:                       # logs en vivo de todos los contenedores
+    image: amir20/dozzle:latest # conviene fijar una versión una vez que veas cuál funciona
+    container_name: dozzle_nyc
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      DOZZLE_NO_ANALYTICS: "true"
+    mem_limit: 64m
+    restart: unless-stopped
+    logging: *logging
+
+  # --- TRABAJOS PUNTUALES (solo gastan RAM mientras corren) ---
+
+  pipeline:                     # dlt + dbt
+    profiles: ["job"]
+    build:
+      context: .
+      dockerfile: Dockerfile.pipeline
+    container_name: pipeline_runner_nyc
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      MES: "${MES}"
+      DBT_PROFILES_DIR: /app/dbt
+      # dlt: un solo worker y buffers chicos = menos RAM
+      EXTRACT__WORKERS: "1"
+      NORMALIZE__WORKERS: "1"
+      LOAD__WORKERS: "1"
+      DATA_WRITER__BUFFER_MAX_ITEMS: "5000"
+      DATA_WRITER__FILE_MAX_ITEMS: "100000"
+    command: >
+      sh -c "python -m src.ingest_dlt --mes ${MES} &&
+             dbt run --project-dir dbt --profiles-dir dbt --threads 1"
+    mem_limit: 2g
+    restart: "no"
+    logging: *logging
+
+  evidence_build:               # genera el sitio estático y lo copia al volumen
+    profiles: ["job"]
+    image: node:20-slim         # slim (Debian) y no alpine: DuckDB trae binarios para glibc
+    container_name: evidence_build_nyc
+    working_dir: /project
+    volumes:
+      - ./evidence:/project
+      - evidence_modules:/project/node_modules
+      - ./data:/data:ro
+      - site:/site
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=1024"
+      EVIDENCE_TELEMETRY_DISABLED: "true"
+    command: >
+      sh -c "npm ci --no-audit --no-fund &&
+             npm run sources &&
+             npm run build &&
+             rm -rf /site/* &&
+             cp -r build/. /site/"
+    mem_limit: 1536m
+    restart: "no"
+    logging: *logging
+
+volumes:
+  site:
+  evidence_modules:

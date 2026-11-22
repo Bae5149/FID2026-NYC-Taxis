@@ -1,0 +1,50 @@
+version: 1
+
+models:
+  - name: stg_yellow_trips
+    description: "Tabla unificada normalizada a snake_case"
+    config:
+      contract:
+        enforced: true # Obliga a dbt a validar los tipos
+    columns:
+      - name: vendor_id
+        data_type: integer
+      - name: tpep_pickup_datetime
+        data_type: timestamp
+      - name: tpep_dropoff_datetime
+        data_type: timestamp
+      - name: passenger_count
+        data_type: bigint
+      - name: trip_distance
+        data_type: double
+      - name: ratecode_id
+        data_type: bigint
+      - name: store_and_fwd_flag
+        data_type: varchar
+      - name: pu_location_id
+        data_type: integer
+      - name: do_location_id
+        data_type: integer
+      - name: payment_type
+        data_type: bigint
+      - name: fare_amount
+        data_type: double
+      - name: extra
+        data_type: double
+      - name: mta_tax
+        data_type: double
+      - name: tip_amount
+        data_type: double
+      - name: tolls_amount
+        data_type: double
+      - name: improvement_surcharge
+        data_type: double
+      - name: total_amount
+        data_type: double
+      - name: congestion_surcharge
+        data_type: double
+      - name: airport_fee
+        data_type: double
+      - name: cbd_congestion_fee
+        data_type: double
+        description: "Nulo para 2024 porque el impuesto no existia."

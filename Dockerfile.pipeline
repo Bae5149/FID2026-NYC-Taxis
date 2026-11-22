@@ -1,0 +1,13 @@
+FROM python:3.13-slim
+
+# Instalamos gcc por si alguna librería necesita compilarse (dlt a veces lo requiere)
+RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiamos el requirements.txt y lo instalamos
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Comando por defecto (se sobrescribe desde el docker-compose)
+CMD ["/bin/bash"]

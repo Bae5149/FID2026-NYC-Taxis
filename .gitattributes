@@ -1,0 +1,7 @@
+# Forzar el uso de LF (Linux) en todos los archivos de texto
+* text=auto eol=lf
+
+# Exceptuar archivos binarios (imagenes, parquet, etc.)
+*.parquet binary
+*.duckdb binary
+*.png binary
