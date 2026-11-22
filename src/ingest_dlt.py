@@ -106,6 +106,17 @@ def main():
     parser.add_argument("--mes", required=True)
     args = parser.parse_args()
 
+    year, month = args.mes.split("-")
+
+    year_int = int(year)
+
+    if year_int <= 2009:
+        raise ValueError(
+            "Para comparar contra el año anterior el año debe ser 2010 o superior."
+        )
+
+    mes_comparacion = f"{year_int - 1}-{month}"
+
     pipeline = dlt.pipeline(
         pipeline_name="nyc_taxi_ingest",
         destination=dlt.destinations.duckdb(credentials=str(DB_PATH)),
@@ -116,6 +127,10 @@ def main():
 
     try:
 
+        print(f"Cargando mes comparativo: {mes_comparacion}")
+        pipeline.run(procesar_mes(mes_comparacion))
+
+        print(f"Cargando mes solicitado: {args.mes}")
         load_info = pipeline.run(procesar_mes(args.mes))
 
         con = duckdb.connect(str(DB_PATH))
@@ -124,7 +139,11 @@ def main():
             UPDATE ingestion_log
             SET estado = 'cargado'
             WHERE archivo LIKE ?
-        """, [f"%{args.mes}.parquet"])
+            OR archivo LIKE ?
+        """, [
+            f"%{mes_comparacion}.parquet",
+            f"%{args.mes}.parquet"
+        ])
 
         con.close()
 
@@ -139,7 +158,12 @@ def main():
             SET estado = 'error_carga',
                 mensaje_error = ?
             WHERE archivo LIKE ?
-        """, [str(e), f"%{args.mes}.parquet"])
+            OR archivo LIKE ?
+        """, [
+            str(e),
+            f"%{mes_comparacion}.parquet",
+            f"%{args.mes}.parquet"
+        ])
 
         con.close()
 
