@@ -1,17 +1,17 @@
-<div align="center">
+
 
 # Pipeline de Ingeniería de Datos — NYC Yellow Taxi (TLC)
 
 Proyecto académico de ingeniería de datos orientado a la comparación interanual de dos meses del dataset oficial de **NYC Yellow Taxi Trip Records (TLC)**, ejecutado sobre una máquina virtual **Debian (4 vCPU, 8 GB RAM)** con un stack eficiente en memoria (**dlt, dbt, DuckDB, Dagster, Python y observabilidad liviana**).
 
 ### Integrantes
-
-| Nombre | Lejago |
-| :---: | :---: |
-| **Jeremias Benjamin Pomares Paz** | Legajo: `58008` |
-| **Ana Carolina Samana Baena** | Legajo: `57944`|
----
-
+    <div align="center">
+    | Nombre | Lejago |
+    | :---: | :---: |
+    | **Jeremias Benjamin Pomares Paz** | Legajo: `58008` |
+    | **Ana Carolina Samana Baena** | Legajo: `57944`|
+    ---
+    </div>
 ## Tabla de Contenidos
 
 [Arquitectura y Stack Tecnológico](#arquitectura-y-stack-tecnológico) •
@@ -226,4 +226,3 @@ Se declara el uso de inteligencia artificial (**Gemini**) como herramienta de ap
 
 Todo el código, reglas de calidad, pruebas y consultas SQL fueron revisados, adaptados y validados por el autor del proyecto.
 
-</div>
