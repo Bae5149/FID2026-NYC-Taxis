@@ -8,6 +8,7 @@ import dlt
 import duckdb
 import requests
 import pyarrow.parquet as pq
+import csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -101,6 +102,27 @@ def procesar_mes(mes: str):
 
         yield rows
 
+@dlt.resource(name="taxi_zones", write_disposition="replace")
+def procesar_zonas():
+
+    archivo_zonas = RAW_DIR / "taxi_zone_lookup.csv"
+
+    if not archivo_zonas.exists():
+
+        print("[zonas] CSV no encontrado. Descargando...")
+
+        descargar_con_reintentos(
+            "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv",
+            archivo_zonas
+        )
+
+    else:
+
+        print("[zonas] CSV existente. Reutilizando archivo.")
+
+    with archivo_zonas.open("r", encoding="utf-8") as f:
+        yield from csv.DictReader(f)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mes", required=True)
@@ -126,6 +148,9 @@ def main():
     print(f"Iniciando pipeline para el mes {args.mes}...")
 
     try:
+        
+        print("Cargando tabla de zonas...")
+        pipeline.run(procesar_zonas())
 
         print(f"Cargando mes comparativo: {mes_comparacion}")
         pipeline.run(procesar_mes(mes_comparacion))
