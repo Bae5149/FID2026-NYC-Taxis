@@ -15,6 +15,7 @@ dbt-duckdb==1.10.0
 dbt-extractor==0.6.0
 dbt-protos==1.0.615
 deepdiff==8.6.2
+dlt[duckdb]
 duckdb==1.5.5
 idna==3.20
 importlib_metadata==10.2.0
@@ -61,3 +62,4 @@ typing-inspection==0.4.5
 typing_extensions==4.16.0
 urllib3==2.8.0
 zipp==4.1.2
+pyarrow

@@ -1,46 +1,46 @@
-# Variables
-PYTHON := python3
-VENV := .venv
-VENV_PYTHON := $(VENV)/bin/python
-VENV_PIP := $(VENV)/bin/pip
-REQUIREMENTS := requirements.txt
+# Variable para el mes asignado (por defecto 2025-03 si no se especifica)
+MES ?= 2025-03
 
-# Meses: El asignado y el de comparación (calcula el año anterior automáticamente)
-MES ?= 2024-08
-MES_COMP ?= $(shell echo $(MES) | awk -F- '{print $$1-1"-"$$2}')
+# Exportamos MES para que docker compose y los contenedores la hereden
+export MES
 
-# Aseguramos que dbt se ejecute usando el entorno virtual
-export PATH := $(PWD)/$(VENV)/bin:$(PATH)
+.PHONY: all install up down pipeline test dashboards clean
 
-.PHONY: all install ingesta esquema dbt_run dbt_test test
+# 1. Comando único exigido por la consigna: levanta servicios, corre el pipeline y genera resultados
+all: up pipeline
 
-# El flujo completo
-all: install ingesta esquema dbt_run dbt_test test
+# 2. Levantar servicios en segundo plano (Evidence Web, Dozzle, etc.)
+up:
+	@echo "Levantando servicios en segundo plano..."
+	docker compose up -d
 
+# 3. Apagar servicios y eliminar contenedores huérfanos
+down:
+	@echo "Apagando servicios..."
+	docker compose down --remove-orphans
+
+# 4. Construir o reconstruir la imagen del pipeline (dlt + dbt + duckdb)
 install:
-	@test -f $(VENV_PIP) || (echo "Creando entorno virtual..." && $(PYTHON) -m venv $(VENV))
-	@$(VENV_PIP) install --upgrade pip
-	@$(VENV_PIP) install -r $(REQUIREMENTS)
-	@echo "Dependencias listas en $(VENV)/"
+	@echo "Construyendo imagen de Docker del pipeline..."
+	docker compose build pipeline
 
-ingesta: install
-	@echo "Ejecutando ingesta para $(MES) y $(MES_COMP)..."
-	$(VENV_PYTHON) -m src.ingesta $(MES)
-	$(VENV_PYTHON) -m src.ingesta $(MES_COMP)
+# 5. Ejecutar ingesta (dlt), validación de esquema, calidad/cuarentena y modelos (dbt) para $(MES) y su par 2024
+pipeline:
+	@echo "Ejecutando pipeline completo para el mes $(MES)..."
+	docker compose run --rm -e MES=$(MES) pipeline
 
-# Nuevo paso: Validar contrato de esquema ANTES de transformar
-esquema: ingesta
-	@echo "Validando contrato de esquema..."
-	$(VENV_PYTHON) -m src.esquema $(MES) $(MES_COMP)
+# 6. Ejecutar suite de tests automatizados (pytest: calidad sintética, idempotencia y reconciliación)
+test:
+	@echo "Ejecutando tests automatizados..."
+	docker compose run --rm -e MES=$(MES) pipeline pytest tests/
 
-# dbt hace la normalización y unificación (Parte 2) y el modelado (Parte 5)
-dbt_run: esquema
-	@echo "Ejecutando modelos de dbt..."
-	dbt run --project-dir dbt --profiles-dir dbt
+# 7. Compilar el sitio estático de Evidence con los datos actualizados
+dashboards:
+	@echo "Generando dashboards estáticos de Evidence..."
+	docker compose run --rm evidence_build
 
-dbt_test: dbt_run
-	@echo "Ejecutando tests de dbt..."
-	dbt test --project-dir dbt --profiles-dir dbt
-
-test: install
-	$(VENV_PYTHON) -m pytest tests/
+# 8. Limpieza profunda de contenedores, volúmenes y base DuckDB local
+clean:
+	@echo "Limpiando entorno y base de datos local..."
+	docker compose down -v --remove-orphans
+	rm -rf data/nyc_taxi.duckdb data/nyc_taxi.duckdb.wal
