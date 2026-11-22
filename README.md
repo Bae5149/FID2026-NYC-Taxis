@@ -6,10 +6,10 @@ Proyecto académico de ingeniería de datos orientado a la comparación interanu
 
 ### Integrantes
 
-| Columna 1 | Columna 2 |
+| Nombre | Lejago |
 | :---: | :---: |
-| **Jeremias Benjamin Pomares Paz** — Legajo: `58008` | **Ana Carolina Samana Baena** — Legajo: `57944` |
-
+| **Jeremias Benjamin Pomares Paz** | Legajo: `58008` |
+| **Ana Carolina Samana Baena** | Legajo: `57944`|
 ---
 
 ## Tabla de Contenidos
