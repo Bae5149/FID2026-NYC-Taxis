@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 TMP_DIR = DATA_DIR / "duckdb_tmp"
-DB_PATH = DATA_DIR / "pipeline.duckdb"
+DB_PATH = DATA_DIR / "nyc_taxi.duckdb"
 
 TLC_BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data"
 ZONES_URL = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"

@@ -55,6 +55,7 @@ services:
       DATA_WRITER__FILE_MAX_ITEMS: "100000"
     command: >
       sh -c "python -m src.ingest_dlt --mes ${MES} &&
+             python -m src.esquema ${MES} &&
              dbt run --project-dir dbt --profiles-dir dbt --threads 1"
     mem_limit: 2g
     restart: "no"
