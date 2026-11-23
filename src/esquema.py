@@ -58,9 +58,16 @@ def main():
     contrato = cargar_contrato()
     con = duckdb.connect(str(DB_PATH))
     
-    exito = validar_mes(con, sys.argv[1], contrato)
-    if exito and len(sys.argv) >= 3:
-        exito = validar_mes(con, sys.argv[2], contrato)
+    mes = sys.argv[1]
+
+    year, month = mes.split("-")
+
+    mes_comparacion = f"{int(year)-1}-{month}"
+
+    exito = validar_mes(con, mes, contrato)
+
+    if exito:
+        exito = validar_mes(con, mes_comparacion, contrato)
         
     con.close()
     return 0 if exito else 1
