@@ -3,5 +3,9 @@ nyc_taxi:
   outputs:
     dev:
       type: duckdb
-      path: "data/nyc_taxi.duckdb"
-      threads: 8
+      path: "data/dbt_analytics.duckdb"
+      threads: 1
+      settings:
+        memory_limit: "3GB"
+        temp_directory: "/app/data/duckdb_tmp"
+        preserve_insertion_order: false

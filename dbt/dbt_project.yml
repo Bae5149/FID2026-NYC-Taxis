@@ -1,7 +1,36 @@
 name: 'nyc_taxi'
 version: '1.0.0'
 config-version: 2
+
 profile: 'nyc_taxi'
+
 model-paths: ["models"]
-target-path: "target"
-clean-targets: ["target", "dbt_packages"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Umbrales por defecto de calidad de datos (sobreescribibles con --vars)
+vars:
+  max_distancia_millas: 200.0
+  max_velocidad_mph: 80.0
+
+models:
+  nyc_taxi:
+    staging:
+      +materialized: view
+
+    intermediate:
+      +materialized: ephemeral
+
+    data_quality:
+      +materialized: external
+      +format: parquet
+
+    marts:
+      +materialized: table
