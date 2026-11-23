@@ -10,9 +10,9 @@ DB_PATH = DATA_DIR / "nyc_taxi.duckdb"
 TLC_BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data"
 ZONES_URL = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
 
-# Restricciones de hardware (8 GB RAM, 4 núcleos)
-DUCKDB_MEMORY_LIMIT = "5GB"
-DUCKDB_THREADS = 4
+# Restricciones de hardware (8 GB RAM)
+DUCKDB_MEMORY_LIMIT = "3GB"
+DUCKDB_THREADS = 8
 
 # Reintentos de descarga
 MAX_RETRIES = 3

@@ -3,5 +3,5 @@ nyc_taxi:
   outputs:
     dev:
       type: duckdb
-      path: "data/pipeline.duckdb"
-      threads: 4
+      path: "data/nyc_taxi.duckdb"
+      threads: 8
