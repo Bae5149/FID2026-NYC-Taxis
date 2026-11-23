@@ -2,12 +2,11 @@ import argparse
 import hashlib
 import time
 from pathlib import Path
-from datetime import datetime
 
 import dlt
 import duckdb
-import requests
 import pyarrow.parquet as pq
+import requests
 import csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,23 +83,15 @@ def procesar_mes(mes: str):
         con.close()
     
     # 2. Leemos el Parquet en lotes y se lo pasamos a dlt
-    parquet_file = pq.ParquetFile(destino)
+    
+    print("[extract] leyendo parquet con pyarrow")
 
-    lote = 0
+    table = pq.read_table(destino)
 
-    for batch in parquet_file.iter_batches(batch_size=50000):
+    print(type(table))
+    print(table.num_rows)
 
-        lote += 1
-        print(f"[extract] procesando lote {lote}")
-
-        rows = batch.to_pylist()
-
-        for row in rows:
-            for k, v in row.items():
-                if isinstance(v, datetime):
-                    row[k] = v.isoformat()
-
-        yield rows
+    yield table
 
 @dlt.resource(name="taxi_zones", write_disposition="replace")
 def procesar_zonas():
@@ -138,6 +129,8 @@ def main():
         )
 
     mes_comparacion = f"{year_int - 1}-{month}"
+
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     pipeline = dlt.pipeline(
         pipeline_name="nyc_taxi_ingest",
