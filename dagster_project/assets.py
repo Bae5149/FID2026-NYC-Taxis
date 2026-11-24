@@ -35,7 +35,7 @@ def ingesta_dlt():
 
 @asset(
     deps=[ingesta_dlt],
-    description="Validación del contrato de esquema."
+    description="Validación de contrato y esquema."
 )
 def schema_contract():
 
@@ -61,7 +61,7 @@ def schema_contract():
 
 @asset(
     deps=[schema_contract],
-    description="Calidad de datos, curado, cuarentena y reconciliación mediante dbt."
+    description="Calidad de datos, cuarentena, reconciliación y capa curada."
 )
 def dbt_quality():
 
@@ -89,6 +89,33 @@ def dbt_quality():
                 --threads 1 \
                 --vars '{{"mes":"{mes}"}}'
             """
+        ],
+        check=True,
+    )
+
+
+@asset(
+    deps=[dbt_quality],
+    description="Generación de la capa enriquecida particionada estilo Hive."
+)
+def curate_partitioned():
+
+    mes = get_mes()
+
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "run",
+            "--rm",
+            "-e",
+            f"MES={mes}",
+            "pipeline",
+            "python",
+            "-m",
+            "src.curate_partitioned",
+            "--mes",
+            mes,
         ],
         check=True,
     )
