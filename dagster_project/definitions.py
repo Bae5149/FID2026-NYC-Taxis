@@ -5,6 +5,7 @@ from .assets import (
     schema_contract,
     dbt_quality,
     curate_partitioned,
+    dbt_marts,
 )
 
 defs = Definitions(
@@ -13,5 +14,6 @@ defs = Definitions(
         schema_contract,
         dbt_quality,
         curate_partitioned,
+        dbt_marts,
     ]
 )

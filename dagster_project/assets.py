@@ -84,10 +84,11 @@ def dbt_quality():
             mkdir -p data/dq &&
 
             dbt run \
-                --project-dir dbt \
-                --profiles-dir dbt \
-                --threads 1 \
-                --vars '{{"mes":"{mes}"}}'
+            --project-dir dbt \
+            --profiles-dir dbt \
+            --threads 1 \
+            --select +curated_yellow_trips +quarantine_yellow_trips +dq_reconciliation \
+            --vars '{{"mes":"{mes}"}}'
             """
         ],
         check=True,
@@ -116,6 +117,37 @@ def curate_partitioned():
             "src.curate_partitioned",
             "--mes",
             mes,
+        ],
+        check=True,
+    )
+
+@asset(
+    deps=[curate_partitioned],
+    description="Construcción del modelo analítico."
+)
+def dbt_marts():
+
+    mes = get_mes()
+
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "run",
+            "--rm",
+            "-e",
+            f"MES={mes}",
+            "pipeline",
+            "dbt",
+            "run",
+            "--project-dir",
+            "dbt",
+            "--profiles-dir",
+            "dbt",
+            "--select",
+            "marts",
+            "--vars",
+            f'{{"mes":"{mes}"}}'
         ],
         check=True,
     )

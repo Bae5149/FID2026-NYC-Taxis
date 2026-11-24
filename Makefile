@@ -33,7 +33,7 @@ pipeline:
 	DAGSTER_HOME=$(PWD)/.dagster_home \
 	conda run -n nyc-dagster \
 	MES=$(MES) dagster asset materialize \
-	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned" \
+	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned,dbt_marts" \
 	-m dagster_project.definitions
 
 # 6. Ejecutar suite de tests automatizados (pytest: calidad sintética, idempotencia y reconciliación)
@@ -50,7 +50,14 @@ dashboards:
 clean:
 	@echo "Limpiando entorno y base de datos local..."
 	docker compose down -v --remove-orphans
-	rm -rf data/nyc_taxi.duckdb data/nyc_taxi.duckdb.wal
+	rm -rf data/nyc_taxi.duckdb
+	rm -rf data/nyc_taxi.duckdb.wal
+	rm -rf data/dbt_analytics.duckdb
+	rm -rf data/dbt_analytics.duckdb.wal
+	docker run --rm \
+  -v $(PWD)/data:/data \
+  alpine \
+  sh -c "rm -rf /data/curated_hive"
 
 dagster-ui:
 	@echo "Abriendo interfaz de Dagster..."

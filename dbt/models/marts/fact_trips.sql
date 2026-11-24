@@ -1,6 +1,18 @@
+{% set mes_actual = var('mes', '2025-03') %}
+{% set partes = mes_actual.split('-') %}
+{% set anio_actual = partes[0] | int %}
+{% set mes_num = partes[1] | int %}
+
 with base as (
+
     select *
-    from read_parquet('data/curated_hive/**/*.parquet', hive_partitioning = true)
+    from read_parquet(
+        '/app/data/curated_hive/**/*.parquet',
+        hive_partitioning = true
+    )
+    where month = {{ mes_num }}
+      and year in ({{ anio_actual }}, {{ anio_actual - 1 }})
+
 )
 
 select

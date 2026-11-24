@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 select
     f.pu_location_id,
     dz.borough as pu_borough,
