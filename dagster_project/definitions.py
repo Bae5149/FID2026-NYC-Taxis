@@ -1,19 +1,15 @@
 from dagster import Definitions
 
 from .assets import (
-    ingesta,
-    esquema,
-    calidad,
-    cuarentena,
-    curated
+    ingesta_dlt,
+    schema_contract,
+    dbt_quality,
 )
 
 defs = Definitions(
     assets=[
-        ingesta,
-        esquema,
-        calidad,
-        cuarentena,
-        curated
+        ingesta_dlt,
+        schema_contract,
+        dbt_quality,
     ]
 )

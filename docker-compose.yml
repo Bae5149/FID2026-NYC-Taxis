@@ -53,19 +53,7 @@ services:
       LOAD__WORKERS: "1"
       DATA_WRITER__BUFFER_MAX_ITEMS: "5000"
       DATA_WRITER__FILE_MAX_ITEMS: "100000"
-    command: >
-      sh -c '
-        set -e
-        MES_EFECTIVO="${MES:-2025-03}"
-       
-        mkdir -p data/curated
-        mkdir -p data/quarantine
-        mkdir -p data/dq
-       
-        python -m src.ingest_dlt --mes "$${MES_EFECTIVO}"
-        python -m src.esquema "$${MES_EFECTIVO}"
-        dbt run --project-dir dbt --profiles-dir dbt --threads 1 --vars "{\"mes\": \"$${MES_EFECTIVO}\"}"
-      '
+
     mem_limit: 4g
     restart: "no"
     logging: *logging
