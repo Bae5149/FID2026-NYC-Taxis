@@ -7,5 +7,4 @@ nyc_taxi:
       threads: 1
       settings:
         memory_limit: "3GB"
-        temp_directory: "/app/data/duckdb_tmp"
         preserve_insertion_order: false
