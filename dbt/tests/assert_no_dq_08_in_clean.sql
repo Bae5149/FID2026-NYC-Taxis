@@ -7,7 +7,7 @@ select
     trip_distance,
     cast(trip_distance as double)
         / (cast(epoch(tpep_dropoff_datetime - tpep_pickup_datetime) as double) / 3600.0) as velocidad_mph
-from {{ ref('clean_yellow_trips') }}
+from {{ ref('curated_yellow_trips') }}
 where
     tpep_pickup_datetime is not null
     and tpep_dropoff_datetime is not null

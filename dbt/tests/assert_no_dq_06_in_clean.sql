@@ -9,7 +9,7 @@ select
     t.periodo_mes,
     t.pu_location_id,
     t.do_location_id
-from {{ ref('clean_yellow_trips') }} t
+from {{ ref('curated_yellow_trips') }} t
 left join zonas_validas z_pu
     on t.pu_location_id = z_pu.location_id
 left join zonas_validas z_do

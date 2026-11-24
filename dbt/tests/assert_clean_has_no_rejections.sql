@@ -3,7 +3,7 @@ select
     source_file,
     tpep_pickup_datetime,
     tpep_dropoff_datetime
-from {{ ref('clean_yellow_trips') }}
+from {{ ref('curated_yellow_trips') }}
 where
     coalesce(es_rechazo_dq, false) = true
     or (

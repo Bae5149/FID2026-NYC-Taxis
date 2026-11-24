@@ -21,6 +21,6 @@ select
     airport_fee,
     cbd_congestion_fee,
     count(*) as cantidad
-from {{ ref('clean_yellow_trips') }}
+from {{ ref('curated_yellow_trips') }}
 group by all
 having count(*) > 1

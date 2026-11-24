@@ -1,6 +1,6 @@
 {{ config(
     materialized='external',
-    location='data/clean/clean_yellow_trips.parquet',
+    location='data/curated/curated_yellow_trips.parquet',
     format='parquet'
 ) }}
 
