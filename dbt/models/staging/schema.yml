@@ -1,12 +1,18 @@
-version: 1
+version: 2
 
 models:
   - name: stg_yellow_trips
-    description: "Tabla unificada normalizada a snake_case"
+    description: "Viajes Yellow Taxi normalizados a snake_case y unificados para el mes solicitado y su comparativo interanual directo desde Parquet."
     config:
       contract:
-        enforced: true # Obliga a dbt a validar los tipos
+        enforced: true
     columns:
+      - name: periodo_mes
+        data_type: varchar
+      - name: es_mes_solicitado
+        data_type: boolean
+      - name: source_file
+        data_type: varchar
       - name: vendor_id
         data_type: integer
       - name: tpep_pickup_datetime
@@ -47,4 +53,3 @@ models:
         data_type: double
       - name: cbd_congestion_fee
         data_type: double
-        description: "Nulo para 2024 porque el impuesto no existia."
