@@ -37,13 +37,10 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
   [Python / PyArrow / DuckDB]
         │
         ▼  (3. Reglas de calidad, Cuarentena y Reconciliación)
-  [dbt + DuckDB] ──────────► quarantine_trips (rechazadas + motivo) + data/curated/curated_yellow_trips.parquet
+  [dbt + DuckDB] ──────────► quarantine_trips + dq_reconciliation
         │
         ▼  (4. Capa Curada particionada Hive + Modelos Intermediate dbt)
   [src/curate_partitioned.py] ─► data/curated_hive/year=AAAA/month=M/
-        │
-        ▼
-  [dbt intermediate] 
         │
         ▼  (5. Modelado Analítico dbt)
   [dbt marts] ────────► fact_trips, dim_zone, dim_date, agg_zone_hour
@@ -54,17 +51,17 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 
 ### Herramientas Seleccionadas
 
-**Ingesta (`dlt` - data load tool):** Manejo declarativo de fuentes, reintentos automáticos con *backoff*, estado de cargas e idempotencia, conservando los archivos crudos intactos y registrando metadatos (`load_info` e `ingestion_log`).
+**Ingesta (`dlt` - data load tool):** Manejo declarativo de fuentes, reintentos automáticos con *backoff*, estado de cargas e idempotencia, conservando los archivos crudos intactos y registrando metadatos (`ingestion_log`).
 
 **Motor Analítico y Almacenamiento (`DuckDB` + `Parquet`):** Procesamiento columnar *in-process* de alto rendimiento con límites explícitos de memoria (`memory_limit` y `threads`) para evitar desbordamientos en entornos de 8 GB RAM.
 
 **Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción de los modelos dimensionales y agregados en la capa `marts`.
 
-**Orquestación (`Dagster` + `dagster-dbt`):** Definición de *Software-Defined Assets*, control de dependencias, reintentos, logs centralizados por corrida y seguimiento de metadatos (`MaterializeResult`).
+**Orquestación (`Dagster`):** Definición de *Software-Defined Assets* propios, control de dependencias, reintentos. Los modelos dbt se ejecutan mediante assets personalizados utilizando `subprocess.run(...)`
 
 **Observabilidad Liviana (`Dagster UI` + `Evidence.dev` / `Dozzle`):** Monitoreo de corridas, dashboards históricos en SQL sobre archivos estáticos y visualización de logs de contenedores con bajo consumo de memoria en reposo.
 
-**Entorno Reproducible (`Docker` + `code-server`):** Contenerización de servicios para despliegue portable y acceso remoto al entorno de desarrollo.
+**Entorno y Despliegue (`Docker` + `Conda`):** El entorno base de Python se gestiona con Conda (conda activate nyc-dagster), para evitar conflictos de version con dependencias de python/dagster. Los servicios de infraestructura y ejecución se contenerizan con Docker para un despliegue portable, mientras se mantiene su visibilidad en Dozzle.
 
 ## Estructura del Repositorio
 
@@ -72,24 +69,29 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 .
 ├── contracts/
 │   └── yellow_schema.yaml          # Contrato de esquema versionado (nombres y tipos)
-├── dbt_project/                    # Proyecto dbt (staging, quarantine, intermediate, etc.)
+├── dbt/                    # Proyecto dbt (staging, quarantine, intermediate, etc.)
 │   ├── models/
 │       └── marts/                  
 │       └── staging/
 │       └── data_quality/
 │       └── intermediate/
-schema.yml
-│   ├── tests/                      # Tests singulares SQL (granularidad y reconciliación)
+│   ├── tests/
+│   ├── dbt_project.yml
+│   └── profiles.yml
+├── evidence/                       # Dashboards estáticos (Evidence.dev)
+├── dagster_project/
+│   ├── assets.py                   # Assets propios (subprocess.run)
+│   └── definitions.py
 │   └── dbt_project.yml
 ├── src/
-│   ├── curate_partitioned.py       # Capa curada particionada Hive, enriquecimiento de zonas y métricas derivadas
-│   ├── ingestion/                  # Pipelines y recursos de dlt (descarga, hash, logs)
-│   ├── schema/                     # Validador de esquema contra contrato YAML
-│   └── dagster_defs/               # Assets, jobs y recursos de Dagster
+│   ├── ingest_dlt.py               # Ingesta con dlt + validaciones de red
+│   ├── curate_partitioned.py       # Capa Hive, zonas y métricas derivadas
+│   ├── esquema.py                  # Validador de contrato YAML
+│   └── db.py                       # Conexión DuckDB
 ├── sql/                            # Consultas SQL individuales para las preguntas de negocio
-├── tests/                          # Tests automatizados (pytest: calidad, idempotencia, reconciliación)
-├── data/                           # Ignorado en Git (.gitignore): raw/, curated/, curated_hive/, duckdb/
-├── .dagster_home/
+├── tests/                          # Tests automatizados 
+├── data/                           # Ignorado en Git (.gitignore): raw/, curated/, curated_hive/
+├── .dagster_home/                  # Idem
 ├── dagster_project/  
 ├── docker-compose.yml              # Servicios contenerizados (Dagster, code-server, Dozzle)
 ├── Makefile                        # Punto de entrada único para ejecución y pruebas
@@ -102,7 +104,7 @@ schema.yml
 
 ### Requisitos Previos
 
-**Python:** `3.11` o superior. • **Make** y **Docker / Docker Compose**. • **Hardware recomendado:** 4 núcleos CPU y 8 GB de RAM.
+**Python:** `3.11` o inferior a `3.14`. • **Make** y **Docker / Docker Compose**. • **Conda**. • **Hardware recomendado:** 4 núcleos CPU y 8 GB de RAM.
 
 ### 1. Configuración Local
 
@@ -110,9 +112,9 @@ schema.yml
 git clone <URL_DEL_REPOSITORIO>
 cd FID2026-NYC-Taxis
 
-python3 -m venv .venv
-source .venv/bin/activate
-
+# Crear y activar entorno Conda
+conda create -n nyc-dagster python=3.12 -y
+conda activate nyc-dagster
 pip install -r requirements.txt
 ```
 
@@ -122,12 +124,14 @@ pip install -r requirements.txt
 make all MES=2025-03
 ```
 
-Este comando ejecuta secuencialmente:
+Este comando levanta los servicios de docker y orquesta secuencialmente los 5 assets de Dagster:
 
 1. Levantamiento de servicios de apoyo y ejecución del pipeline para el mes indicado y su comparación con 2024.
-2. Ingesta idempotente mediante `dlt` y auditoría de esquema contra `contracts/yellow_schema.yaml`.
-3. Transformación, reglas de calidad, cuarentena y reconciliación con `dbt` + `DuckDB`.
-4. Generación de la capa curada particionada (`src/curate_partitioned.py` -> `data/curated_hive/`) y materialización/validación de modelos `intermediate` en `dbt`.
+2. ingesta_dlt: Descarga idempotente y validación de hash SHA-256.
+3. schema_contract: Auditoría de esquema contra YAML `contracts/yellow_schema.yaml`.
+4. dbt_quality: Reglas de calidad, cuarentena y reconciliación. con `dbt` + `DuckDB`.
+5. curate_partitioned: Generación de Hive Parquet particionado y enriquecimiento. (`src/curate_partitioned.py` -> `data/curated_hive/`) 
+6. dbt_marts: Materialización del esquema estrella y agregados.
 
 ### 3. Ejecución de Tests Automatizados
 
@@ -138,11 +142,11 @@ dbt test --project-dir dbt_project --profiles-dir dbt_project --select intermedi
 
 ## Etapas del Pipeline
 
-1. **Ingesta (`dlt`):** Descarga los archivos fuente a `data/raw/yellow/year=AAAA/month=MM/` sin alterarlos. Calcula el hash `SHA-256`, verifica existencia previa para garantizar idempotencia y registra cada operación en `ingestion_log` (`archivo`, `url`, `filas`, `bytes`, `hash`, `timestamp`, `estado`), con reintentos ante fallos de red.
-2. **Validación de Esquema:** Audita el esquema físico de cada archivo Parquet contra `contracts/yellow_schema.yaml` antes de transformarlo, reportando columnas faltantes, columnas nuevas y diferencias de tipos, y normaliza los nombres a `snake_case`.
-3. **Calidad y Cuarentena (`dbt`):** Evalúa las reglas de negocio definidas. Los registros que violan reglas de severidad `rechazo` pasan a `quarantine_trips` junto con el archivo origen y el listado de reglas incumplidas; los de severidad `advertencia` mantienen su flujo con marcas en `quality_flags`.
-4. **Capa Curada Particionada (`src/curate_partitioned.py`):** Lee `data/curated/curated_yellow_trips.parquet` para el mes solicitado (`--mes AAAA-MM`) y su par interanual (`(AAAA-1)-MM`), elimina únicamente esas particiones en `data/curated_hive/` si existen (o crea las carpetas si son meses nuevos), calcula métricas derivadas (`duracion_minutos`, `velocidad_promedio_mph`, `fecha_subida`, `hora_subida`, `dia_semana_num`, `dia_semana_nombre`, `porcentaje_propina_tarifa`), realiza el doble `LEFT JOIN` contra `data/raw/taxi_zone_lookup.csv` (`pu_*` y `do_*`) y escribe Parquet particionado por `(year, month)` en `data/curated_hive/`.
-5. **Modelado Intermediate y Analítica (`dbt`):** Construye los modelos `fact_trips`, `dim_zone`, `dim_date` y `agg_zone_hour` en `models/intermediate/` y ejecuta las consultas analíticas documentadas en `RESULTADOS.md`.
+1. **Ingesta (`dlt`):** Descarga los archivos fuente a `data/raw/yellow/year=AAAA/month=MM/` sin alterarlos. Calcula el hash `SHA-256`, verifica existencia previa para garantizar idempotencia y registra cada operación en `ingestion_log` (`archivo`, `url`, `filas`, `bytes`, `hash`, `timestamp`, `estado`), con reintentos ante fallos de red. La tabla de zonas se descarga una sola vez.
+2. **Validación de Esquema:** Audita el Parquet contra `contracts/yellow_schema.yaml` antes de transformarlo, reportando columnas faltantes, columnas nuevas y diferencias de tipos, y normaliza los nombres a `snake_case`. Los dos meses se unifican en la capa de staging.
+3. **Calidad y Cuarentena (`dbt`):** Evalúa las reglas de negocio definidas. Los registros que violan reglas de severidad `rechazo` pasan a `quarantine_trips` (guardando la fila original, archivo origen y las reglas violadas); los de severidad `advertencia` se marcan en una columna de flags sin descartar la fila. Se genera el reporte `dq_reconciliation`.
+4. **Transformación y Almacenamiento (`src/curate_partitioned.py`):** Lee `data/curated/curated_yellow_trips.parquet` para el mes solicitado (`--mes AAAA-MM`) y su par interanual (`(AAAA-1)-MM`), elimina únicamente esas particiones en `data/curated_hive/` si existen (o crea las carpetas si son meses nuevos), calcula métricas derivadas (`duracion_minutos`, `velocidad_promedio_mph`, `fecha_subida`, `hora_subida`, `dia_semana_num`, `dia_semana_nombre`, `porcentaje_propina_tarifa`), realiza el doble `LEFT JOIN` contra `data/raw/taxi_zone_lookup.csv` (`pu_*` y `do_*`) y escribe Parquet particionado por `(year, month)` en `data/curated_hive/`.
+5. **Modelado y preguntas (`dbt`):** Construye los modelos `fact_trips`, `dim_zone`, `dim_date` y `agg_zone_hour`. Deja preparadas estas tablas para ser utilizadas por las consultas planteadas en el parcial. No obstante, los resultados de ejecucion de estas ultimas, correspondientes a la comparacion de del mes 06 del 2025 y del 2024, estan documentadas en `RESULTADOS.md`.
 
 ## Decisiones Técnicas y de Negocio
 
@@ -150,7 +154,7 @@ dbt test --project-dir dbt_project --profiles-dir dbt_project --select intermedi
 
 **Tratamiento de `cbd_congestion_fee` en 2024:** Este cargo entró en vigor en enero de 2025, por lo que no existe en los archivos de 2024. En los datos de 2024 se inyecta explícitamente casteado a `DOUBLE` con valor `NULL` (no `0.0`), evitando distorsionar métricas históricas o confundir ausencia de impuesto con viajes exentos.
 
-**Columnas nuevas no contempladas en el contrato:** Se registra una advertencia (`WARNING`) en los logs indicando nombre y tipo de la columna desconocida, y se excluye de la proyección hacia *staging* hasta que el contrato YAML sea actualizado de forma explícita.
+**Columnas nuevas no contempladas en el contrato:**  Si el validador detecta una columna no contemplada en el contrato, registra una advertencia (WARNING) indicando nombre y tipo, y la excluye de la proyección hacia `staging` hasta que el contrato YAML sea actualizado.
 
 ### Tipado de Datos en el Contrato (`contracts/yellow_schema.yaml`)
 

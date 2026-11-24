@@ -1,0 +1,20 @@
+[0m11:02:33  Running with dbt=1.12.7
+[0m11:02:34  Registered adapter: duckdb=1.10.0
+[0m11:02:35  Found 11 models, 10 data tests, 484 macros
+[0m11:02:35  
+[0m11:02:35  Concurrency: 1 threads (target='dev')
+[0m11:02:35  
+[0m11:02:35  1 of 4 START sql table model main.dim_date ..................................... [RUN]
+[0m11:02:35  1 of 4 OK created sql table model main.dim_date ................................ [[32mOK[0m in 0.27s]
+[0m11:02:35  2 of 4 START sql table model main.dim_zone ..................................... [RUN]
+[0m11:02:36  2 of 4 OK created sql table model main.dim_zone ................................ [[32mOK[0m in 0.83s]
+[0m11:02:36  3 of 4 START sql table model main.fact_trips ................................... [RUN]
+[0m11:02:49  3 of 4 OK created sql table model main.fact_trips .............................. [[32mOK[0m in 13.19s]
+[0m11:02:49  4 of 4 START sql view model main.agg_zone_hour ................................. [RUN]
+[0m11:02:49  4 of 4 OK created sql view model main.agg_zone_hour ............................ [[32mOK[0m in 0.25s]
+[0m11:02:49  
+[0m11:02:49  Finished running 3 table models, 1 view model in 0 hours 0 minutes and 14.74 seconds (14.74s).
+[0m11:02:49  
+[0m11:02:49  [32mCompleted successfully[0m
+[0m11:02:49  
+[0m11:02:49  Done. PASS=4 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=4
