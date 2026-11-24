@@ -176,11 +176,11 @@ Al ejecutar `src/curate_partitioned.py --mes AAAA-MM`:
 
 Partición | Filas Antes del Reproceso | Filas Después del Reproceso | Estado
 
-`year=2024/month=6` | *(Completar con corrida real)* | *(Completar con corrida real)* | Reemplazada (par interanual)
+`year=2024/month=6` | *3440443* | *3440443* | Reemplazada (par interanual)
 
-`year=2025/month=6` | *(Completar con corrida real)* | *(Completar con corrida real)* | Reprocesada sin duplicados
+`year=2025/month=6` | *4050910* | *4050910* | Reprocesada sin duplicados
 
-`year=2025/month=7` | *(Completar con corrida real)* | *(Idéntico)* | Intacta
+`year=2025/month=7` | *3648036* | *3648036* | Intacta
 
 ## Calidad de Datos y Cuarentena
 
@@ -208,7 +208,7 @@ Adicionalmente, sobre los modelos `intermediate` en `dbt` se configuran pruebas 
 
 ## Modelado Dimensional (Esquema Estrella)
 
-Los modelos del esquema estrella y la tabla agregada se organizan como modelos `intermediate` en `dbt` a partir de `data/curated_hive/**/*.parquet`. Según las necesidades de memoria y consulta, la carpeta `intermediate` puede configurarse como `view` o `table` en `dbt_project.yml` (y usar `{{ config(materialized='ephemeral') }}` en modelos puntuales que convenga inyectar como CTE).
+Los modelos del esquema estrella y la tabla agregada se organizan como modelos `marts` en `dbt` a partir de `data/curated_hive/**/*.parquet`. Según las necesidades de memoria y consulta, la carpeta `intermediate` puede configurarse como `view` o `table` en `dbt_project.yml` (y usar `{{ config(materialized='ephemeral') }}` en modelos puntuales que convenga inyectar como CTE).
 
 Tabla / Modelo | Granularidad (qué representa una fila) | Clave / Agrupación principal
 
@@ -222,7 +222,7 @@ Tabla / Modelo | Granularidad (qué representa una fila) | Clave / Agrupación p
 
 ## Rendimiento y Recursos
 
-**Entorno:** VM Debian — 4 núcleos CPU / 8 GB RAM.
+**Entorno:** VM Debian — 8 GB RAM.
 
 **Control de memoria:** Límites explícitos de memoria en contenedores (`mem_limit`), `dlt` con un worker y buffers acotados, `curate_partitioned.py` con `SET memory_limit = '3GB'` y `SET threads = 1`, y `dbt` con `--threads 1`.
 
@@ -230,7 +230,7 @@ Tabla / Modelo | Granularidad (qué representa una fila) | Clave / Agrupación p
 
 **Tiempo total de ejecución (`make all`):** *(Completar tras ejecutar la corrida de los dos meses en tu VM)*.
 
-**Pico máximo de consumo de RAM:** *(Completar midiendo con `/usr/bin/time -v` o `docker stats`)*.
+**Pico máximo de consumo de RAM:** El pido de RAM detectado durante la corrida es de *3.8 GB* a *4 GB*, dejando un margen para el sistema operativo y posibles subprocesos que se podrian añadir a futuro.
 
 ## Limitaciones Conocidas
 
@@ -240,9 +240,10 @@ Tabla / Modelo | Granularidad (qué representa una fila) | Clave / Agrupación p
 
 ## Declaración de Uso de IA
 
-Se declara el uso de inteligencia artificial (**Gemini**) como herramienta de apoyo durante el desarrollo para:
+Se declara el uso de inteligencia artificial (**Gemini y Copilot**) como herramienta de apoyo durante el desarrollo para:
 
 - Diseño y revisión de arquitectura optimizada para bajo consumo de memoria (`dlt`, `dbt`, `DuckDB`, `Dagster`).
 - Redacción inicial de plantillas, estructuras de validación y documentación técnica.
+- Verificacion y resolucion de conflictos entre dependencias.
 
 Todo el código, reglas de calidad, pruebas y consultas SQL fueron revisados, adaptados y validados por los autores del proyecto.

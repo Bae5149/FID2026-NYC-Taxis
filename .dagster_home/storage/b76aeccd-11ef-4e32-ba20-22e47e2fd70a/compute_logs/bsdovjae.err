@@ -1,0 +1,9 @@
+2026-11-24 19:19:29 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - LOGS_CAPTURED - Capturing logs for process (pid: 5381).
+2026-11-24 19:19:29 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - dbt_marts - STEP_START - Started execution of step "dbt_marts".
+ Container nyc_taxi-pipeline-run-c49182dab9ad Creating 
+ Container nyc_taxi-pipeline-run-c49182dab9ad Created 
+2026-11-24 19:19:56 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - dbt_marts - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2026-11-24 19:19:56 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - dbt_marts - Writing file at: /home/moonie999/proyectosFID/nyc-taxis-pipeline/.dagster_home/storage/dbt_marts using PickledObjectFilesystemIOManager...
+2026-11-24 19:19:56 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - dbt_marts - ASSET_MATERIALIZATION - Materialized value dbt_marts.
+2026-11-24 19:19:56 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - dbt_marts - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2026-11-24 19:19:56 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5381 - dbt_marts - STEP_SUCCESS - Finished execution of step "dbt_marts" in 27.42s.

@@ -1,0 +1,9 @@
+2026-11-24 19:17:58 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - LOGS_CAPTURED - Capturing logs for process (pid: 5231).
+2026-11-24 19:17:58 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - ingesta_dlt - STEP_START - Started execution of step "ingesta_dlt".
+ Container nyc_taxi-pipeline-run-388fa94b8b36 Creating 
+ Container nyc_taxi-pipeline-run-388fa94b8b36 Created 
+2026-11-24 19:18:04 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - ingesta_dlt - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2026-11-24 19:18:04 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - ingesta_dlt - Writing file at: /home/moonie999/proyectosFID/nyc-taxis-pipeline/.dagster_home/storage/ingesta_dlt using PickledObjectFilesystemIOManager...
+2026-11-24 19:18:04 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - ingesta_dlt - ASSET_MATERIALIZATION - Materialized value ingesta_dlt.
+2026-11-24 19:18:04 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - ingesta_dlt - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2026-11-24 19:18:04 +0000 - dagster - DEBUG - __ASSET_JOB - b76aeccd-11ef-4e32-ba20-22e47e2fd70a - 5231 - ingesta_dlt - STEP_SUCCESS - Finished execution of step "ingesta_dlt" in 6.07s.
