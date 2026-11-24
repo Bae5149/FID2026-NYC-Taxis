@@ -17,7 +17,7 @@ clean-targets:
 
 # Umbrales por defecto de calidad de datos (sobreescribibles con --vars)
 vars:
-  max_distancia_millas: 100.0
+  max_distancia_millas: 200.0
   max_velocidad_mph: 80.0
 
 models:
