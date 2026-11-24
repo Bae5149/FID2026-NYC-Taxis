@@ -1,0 +1,9 @@
+2026-11-24 09:12:46 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - LOGS_CAPTURED - Capturing logs for process (pid: 116205).
+2026-11-24 09:12:46 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - schema_contract - STEP_START - Started execution of step "schema_contract".
+ Container nyc_taxi-pipeline-run-68f556596a99 Creating 
+ Container nyc_taxi-pipeline-run-68f556596a99 Created 
+2026-11-24 09:12:48 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - schema_contract - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2026-11-24 09:12:48 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - schema_contract - Writing file at: /home/moonie999/proyectosFID/nyc-taxis-pipeline/.dagster_home/storage/schema_contract using PickledObjectFilesystemIOManager...
+2026-11-24 09:12:48 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - schema_contract - ASSET_MATERIALIZATION - Materialized value schema_contract.
+2026-11-24 09:12:48 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - schema_contract - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2026-11-24 09:12:48 +0000 - dagster - DEBUG - __ASSET_JOB - e2140bc5-38f7-4232-877b-f09ac6d73375 - 116205 - schema_contract - STEP_SUCCESS - Finished execution of step "schema_contract" in 1.69s.

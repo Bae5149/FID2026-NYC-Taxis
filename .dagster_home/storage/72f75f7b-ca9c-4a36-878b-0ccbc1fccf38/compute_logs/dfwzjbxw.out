@@ -1,0 +1,22 @@
+[0m08:26:21  Running with dbt=1.12.7
+[0m08:26:22  Registered adapter: duckdb=1.10.0
+[0m08:26:22  Found 11 models, 10 data tests, 484 macros
+[0m08:26:22  
+[0m08:26:22  Concurrency: 1 threads (target='dev')
+[0m08:26:22  
+[0m08:26:22  1 of 5 START sql view model main.stg_taxi_zones ................................ [RUN]
+[0m08:26:23  1 of 5 OK created sql view model main.stg_taxi_zones ........................... [[32mOK[0m in 0.13s]
+[0m08:26:23  2 of 5 START sql view model main.stg_yellow_trips .............................. [RUN]
+[0m08:26:23  2 of 5 OK created sql view model main.stg_yellow_trips ......................... [[32mOK[0m in 0.12s]
+[0m08:26:23  3 of 5 START sql external model main.curated_yellow_trips ...................... [RUN]
+[0m08:26:40  3 of 5 OK created sql external model main.curated_yellow_trips ................. [[32mOK[0m in 16.96s]
+[0m08:26:40  4 of 5 START sql external model main.dq_reconciliation ......................... [RUN]
+[0m08:26:46  4 of 5 OK created sql external model main.dq_reconciliation .................... [[32mOK[0m in 6.34s]
+[0m08:26:46  5 of 5 START sql external model main.quarantine_yellow_trips ................... [RUN]
+[0m08:26:54  5 of 5 OK created sql external model main.quarantine_yellow_trips .............. [[32mOK[0m in 7.59s]
+[0m08:26:54  
+[0m08:26:54  Finished running 3 external models, 2 view models in 0 hours 0 minutes and 31.52 seconds (31.52s).
+[0m08:26:54  
+[0m08:26:54  [32mCompleted successfully[0m
+[0m08:26:54  
+[0m08:26:54  Done. PASS=5 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=5

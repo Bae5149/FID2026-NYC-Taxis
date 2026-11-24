@@ -43,7 +43,10 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
   [src/curate_partitioned.py] ─► data/curated_hive/year=AAAA/month=M/
         │
         ▼
-  [dbt intermediate] ────────► fact_trips, dim_zone, dim_date, agg_zone_hour
+  [dbt intermediate] 
+        │
+        ▼  (5. Modelado Analítico dbt)
+  [dbt marts] ────────► fact_trips, dim_zone, dim_date, agg_zone_hour
         │
         ▲
 [Orquestación y Observabilidad: Dagster UI + Evidence.dev / Dozzle]
@@ -55,7 +58,7 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 
 **Motor Analítico y Almacenamiento (`DuckDB` + `Parquet`):** Procesamiento columnar *in-process* de alto rendimiento con límites explícitos de memoria (`memory_limit` y `threads`) para evitar desbordamientos en entornos de 8 GB RAM.
 
-**Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción de los modelos dimensionales y agregados en la capa `intermediate`.
+**Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción de los modelos dimensionales y agregados en la capa `marts`.
 
 **Orquestación (`Dagster` + `dagster-dbt`):** Definición de *Software-Defined Assets*, control de dependencias, reintentos, logs centralizados por corrida y seguimiento de metadatos (`MaterializeResult`).
 
@@ -71,7 +74,11 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 │   └── yellow_schema.yaml          # Contrato de esquema versionado (nombres y tipos)
 ├── dbt_project/                    # Proyecto dbt (staging, quarantine, intermediate, etc.)
 │   ├── models/
-│   │   └── intermediate/           # fact_trips.sql, dim_zone.sql, dim_date.sql, agg_zone_hour.sql, schema.yml
+│       └── marts/                  
+│       └── staging/
+│       └── data_quality/
+│       └── intermediate/
+schema.yml
 │   ├── tests/                      # Tests singulares SQL (granularidad y reconciliación)
 │   └── dbt_project.yml
 ├── src/
@@ -82,6 +89,8 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 ├── sql/                            # Consultas SQL individuales para las preguntas de negocio
 ├── tests/                          # Tests automatizados (pytest: calidad, idempotencia, reconciliación)
 ├── data/                           # Ignorado en Git (.gitignore): raw/, curated/, curated_hive/, duckdb/
+├── .dagster_home/
+├── dagster_project/  
 ├── docker-compose.yml              # Servicios contenerizados (Dagster, code-server, Dozzle)
 ├── Makefile                        # Punto de entrada único para ejecución y pruebas
 ├── requirements.txt                # Dependencias de Python (Python 3.11+)

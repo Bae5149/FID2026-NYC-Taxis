@@ -1,0 +1,19 @@
+[0m08:06:37  Running with dbt=1.12.7
+[0m08:06:38  Registered adapter: duckdb=1.10.0
+[0m08:06:38  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m08:06:41  Found 11 models, 10 data tests, 484 macros
+[0m08:06:41  
+[0m08:06:41  Concurrency: 1 threads (target='dev')
+[0m08:06:41  
+[0m08:06:41  1 of 3 START sql external model main.curated_yellow_trips ...................... [RUN]
+[0m08:07:03  1 of 3 OK created sql external model main.curated_yellow_trips ................. [[32mOK[0m in 21.61s]
+[0m08:07:03  2 of 3 START sql external model main.dq_reconciliation ......................... [RUN]
+[0m08:07:10  2 of 3 OK created sql external model main.dq_reconciliation .................... [[32mOK[0m in 7.44s]
+[0m08:07:10  3 of 3 START sql external model main.quarantine_yellow_trips ................... [RUN]
+[0m08:07:20  3 of 3 OK created sql external model main.quarantine_yellow_trips .............. [[32mOK[0m in 9.49s]
+[0m08:07:20  
+[0m08:07:20  Finished running 3 external models in 0 hours 0 minutes and 38.92 seconds (38.92s).
+[0m08:07:20  
+[0m08:07:20  [32mCompleted successfully[0m
+[0m08:07:20  
+[0m08:07:20  Done. PASS=3 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=3

@@ -1,0 +1,21 @@
+[0m08:07:34  Running with dbt=1.12.7
+[0m08:07:35  Registered adapter: duckdb=1.10.0
+[0m08:07:35  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m08:07:38  Found 11 models, 10 data tests, 484 macros
+[0m08:07:38  
+[0m08:07:38  Concurrency: 1 threads (target='dev')
+[0m08:07:38  
+[0m08:07:38  1 of 4 START sql table model main.dim_date ..................................... [RUN]
+[0m08:07:39  1 of 4 OK created sql table model main.dim_date ................................ [[32mOK[0m in 0.30s]
+[0m08:07:39  2 of 4 START sql table model main.dim_zone ..................................... [RUN]
+[0m08:07:40  2 of 4 OK created sql table model main.dim_zone ................................ [[32mOK[0m in 1.14s]
+[0m08:07:40  3 of 4 START sql table model main.fact_trips ................................... [RUN]
+[0m08:07:58  3 of 4 OK created sql table model main.fact_trips .............................. [[32mOK[0m in 18.05s]
+[0m08:07:58  4 of 4 START sql table model main.agg_zone_hour ................................ [RUN]
+[0m08:07:59  4 of 4 OK created sql table model main.agg_zone_hour ........................... [[32mOK[0m in 0.93s]
+[0m08:07:59  
+[0m08:07:59  Finished running 4 table models in 0 hours 0 minutes and 20.68 seconds (20.68s).
+[0m08:07:59  
+[0m08:07:59  [32mCompleted successfully[0m
+[0m08:07:59  
+[0m08:07:59  Done. PASS=4 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=4

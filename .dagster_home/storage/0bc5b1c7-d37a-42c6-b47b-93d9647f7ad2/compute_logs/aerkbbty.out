@@ -1,0 +1,15 @@
+Iniciando pipeline para el mes 2025-07...
+Cargando tabla de zonas...
+[zonas] CSV existente. Reutilizando archivo.
+Cargando mes comparativo: 2024-07
+Descargando https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-07.parquet... (intento 1)
+[descargado] yellow_tripdata_2024-07.parquet descargado y registrado en ingestion_log (3,076,903 filas).
+[extract] leyendo parquet con pyarrow
+Cargando mes solicitado: 2025-07
+Descargando https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-07.parquet... (intento 1)
+[descargado] yellow_tripdata_2025-07.parquet descargado y registrado en ingestion_log (3,898,963 filas).
+[extract] leyendo parquet con pyarrow
+Pipeline nyc_taxi_ingest load step finished in 2.55 seconds
+1 load package(s) were loaded to destination duckdb and into dataset raw
+The duckdb destination used duckdb:////app/data/nyc_taxi.duckdb location to store data
+Load package 1795513712.3216062 is LOADED and contains no failed jobs

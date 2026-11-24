@@ -1,0 +1,57 @@
+[0m07:40:59  Running with dbt=1.12.7
+[0m07:41:00  Registered adapter: duckdb=1.10.0
+[0m07:41:00  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m07:41:03  Found 11 models, 10 data tests, 484 macros
+[0m07:41:03  
+[0m07:41:03  Concurrency: 1 threads (target='dev')
+[0m07:41:03  
+[0m07:41:04  1 of 9 START sql table model main.dim_date ..................................... [RUN]
+[0m07:41:04  1 of 9 ERROR creating sql table model main.dim_date ............................ [[31mERROR[0m in 0.09s]
+[0m07:41:04  2 of 9 START sql table model main.dim_zone ..................................... [RUN]
+[0m07:41:04  2 of 9 ERROR creating sql table model main.dim_zone ............................ [[31mERROR[0m in 0.03s]
+[0m07:41:04  3 of 9 START sql table model main.fact_trips ................................... [RUN]
+[0m07:41:04  3 of 9 ERROR creating sql table model main.fact_trips .......................... [[31mERROR[0m in 0.03s]
+[0m07:41:04  4 of 9 START sql view model main.stg_taxi_zones ................................ [RUN]
+[0m07:41:04  4 of 9 OK created sql view model main.stg_taxi_zones ........................... [[32mOK[0m in 0.11s]
+[0m07:41:04  5 of 9 START sql view model main.stg_yellow_trips .............................. [RUN]
+[0m07:41:04  5 of 9 OK created sql view model main.stg_yellow_trips ......................... [[32mOK[0m in 0.10s]
+[0m07:41:04  6 of 9 SKIP relation main.agg_zone_hour ........................................ [[33mSKIP[0m]
+[0m07:41:04  7 of 9 START sql external model main.curated_yellow_trips ...................... [RUN]
+[0m07:41:26  7 of 9 OK created sql external model main.curated_yellow_trips ................. [[32mOK[0m in 21.85s]
+[0m07:41:26  8 of 9 START sql external model main.dq_reconciliation ......................... [RUN]
+[0m07:41:33  8 of 9 OK created sql external model main.dq_reconciliation .................... [[32mOK[0m in 7.49s]
+[0m07:41:33  9 of 9 START sql external model main.quarantine_yellow_trips ................... [RUN]
+[0m07:41:43  9 of 9 OK created sql external model main.quarantine_yellow_trips .............. [[32mOK[0m in 9.42s]
+[0m07:41:43  
+[0m07:41:43  Finished running 3 external models, 4 table models, 2 view models in 0 hours 0 minutes and 39.54 seconds (39.54s).
+[0m07:41:43  
+[0m07:41:43  [31mCompleted with 3 errors, 0 partial successes, and 0 warnings:[0m
+[0m07:41:43  
+[0m07:41:43  [[31mERROR[0m]: in model dim_date (models/marts/dim_date.sql)
+[0m07:41:43    Runtime Error in model dim_date (models/marts/dim_date.sql)
+  IO Error: No files found that match the pattern "data/curated_hive/**/*.parquet"
+  
+  LINE 18:     from read_parquet('data/curated_hive/**/*.parquet', hive_partiti...
+                    ^
+[0m07:41:43  
+[0m07:41:43    compiled code at target/compiled/nyc_taxi/models/marts/dim_date.sql
+[0m07:41:43  
+[0m07:41:43  [[31mERROR[0m]: in model dim_zone (models/marts/dim_zone.sql)
+[0m07:41:43    Runtime Error in model dim_zone (models/marts/dim_zone.sql)
+  IO Error: No files found that match the pattern "data/curated_hive/**/*.parquet"
+  
+  LINE 13:     from read_parquet('data/curated_hive/**/*.parquet', hive_partiti...
+                    ^
+[0m07:41:43  
+[0m07:41:43    compiled code at target/compiled/nyc_taxi/models/marts/dim_zone.sql
+[0m07:41:43  
+[0m07:41:43  [[31mERROR[0m]: in model fact_trips (models/marts/fact_trips.sql)
+[0m07:41:43    Runtime Error in model fact_trips (models/marts/fact_trips.sql)
+  IO Error: No files found that match the pattern "data/curated_hive/**/*.parquet"
+  
+  LINE 13:     from read_parquet('data/curated_hive/**/*.parquet', hive_partiti...
+                    ^
+[0m07:41:43  
+[0m07:41:43    compiled code at target/compiled/nyc_taxi/models/marts/fact_trips.sql
+[0m07:41:43  
+[0m07:41:43  Done. PASS=5 WARN=0 ERROR=3 SKIP=1 NO-OP=0 REUSED=0 TOTAL=9

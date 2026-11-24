@@ -1,0 +1,9 @@
+2026-11-24 09:05:04 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - LOGS_CAPTURED - Capturing logs for process (pid: 115928).
+2026-11-24 09:05:04 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - dbt_quality - STEP_START - Started execution of step "dbt_quality".
+ Container nyc_taxi-pipeline-run-a765ec963bab Creating 
+ Container nyc_taxi-pipeline-run-a765ec963bab Created 
+2026-11-24 09:05:46 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - dbt_quality - STEP_OUTPUT - Yielded output "result" of type "Any". (Type check passed).
+2026-11-24 09:05:46 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - dbt_quality - Writing file at: /home/moonie999/proyectosFID/nyc-taxis-pipeline/.dagster_home/storage/dbt_quality using PickledObjectFilesystemIOManager...
+2026-11-24 09:05:46 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - dbt_quality - ASSET_MATERIALIZATION - Materialized value dbt_quality.
+2026-11-24 09:05:46 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - dbt_quality - HANDLED_OUTPUT - Handled output "result" using IO manager "io_manager"
+2026-11-24 09:05:46 +0000 - dagster - DEBUG - __ASSET_JOB - 2a1163ab-ee2c-4627-96f1-3735e482d4cd - 115928 - dbt_quality - STEP_SUCCESS - Finished execution of step "dbt_quality" in 41.88s.

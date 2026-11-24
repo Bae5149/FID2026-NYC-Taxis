@@ -1,0 +1,30 @@
+[0m09:38:47  Running with dbt=1.12.7
+[0m09:38:48  Registered adapter: duckdb=1.10.0
+[0m09:38:48  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m09:38:51  Found 11 models, 10 data tests, 484 macros
+[0m09:38:51  
+[0m09:38:51  Concurrency: 1 threads (target='dev')
+[0m09:38:51  
+[0m09:38:51  1 of 4 START sql table model main.dim_date ..................................... [RUN]
+[0m09:38:51  1 of 4 ERROR creating sql table model main.dim_date ............................ [[31mERROR[0m in 0.10s]
+[0m09:38:51  2 of 4 START sql table model main.dim_zone ..................................... [RUN]
+[0m09:38:51  2 of 4 OK created sql table model main.dim_zone ................................ [[32mOK[0m in 0.12s]
+[0m09:38:51  3 of 4 START sql table model main.fact_trips ................................... [RUN]
+[0m09:38:51  3 of 4 OK created sql table model main.fact_trips .............................. [[32mOK[0m in 0.10s]
+[0m09:38:51  4 of 4 START sql view model main.agg_zone_hour ................................. [RUN]
+[0m09:38:51  4 of 4 OK created sql view model main.agg_zone_hour ............................ [[32mOK[0m in 0.07s]
+[0m09:38:51  
+[0m09:38:51  Finished running 3 table models, 1 view model in 0 hours 0 minutes and 0.60 seconds (0.60s).
+[0m09:38:51  
+[0m09:38:51  [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m09:38:51  
+[0m09:38:51  [[31mERROR[0m]: in model dim_date (models/marts/dim_date.sql)
+[0m09:38:51    Runtime Error in model dim_date (models/marts/dim_date.sql)
+  Parser Error: syntax error at or near "where"
+  
+  LINE 29:     where fecha_subida is not null
+               ^
+[0m09:38:51  
+[0m09:38:51    compiled code at target/compiled/nyc_taxi/models/marts/dim_date.sql
+[0m09:38:51  
+[0m09:38:51  Done. PASS=3 WARN=0 ERROR=1 SKIP=0 NO-OP=0 REUSED=0 TOTAL=4

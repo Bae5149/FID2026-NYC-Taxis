@@ -1,0 +1,30 @@
+[0m08:45:26  Running with dbt=1.12.7
+[0m08:45:26  Registered adapter: duckdb=1.10.0
+[0m08:45:27  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m08:45:30  Found 11 models, 10 data tests, 484 macros
+[0m08:45:30  
+[0m08:45:30  Concurrency: 1 threads (target='dev')
+[0m08:45:30  
+[0m08:45:30  1 of 4 START sql table model main.dim_date ..................................... [RUN]
+[0m08:45:30  1 of 4 OK created sql table model main.dim_date ................................ [[32mOK[0m in 0.36s]
+[0m08:45:30  2 of 4 START sql table model main.dim_zone ..................................... [RUN]
+[0m08:45:32  2 of 4 OK created sql table model main.dim_zone ................................ [[32mOK[0m in 1.59s]
+[0m08:45:32  3 of 4 START sql table model main.fact_trips ................................... [RUN]
+[0m08:46:05  3 of 4 OK created sql table model main.fact_trips .............................. [[32mOK[0m in 32.95s]
+[0m08:46:05  4 of 4 START sql view model main.agg_zone_hour ................................. [RUN]
+[0m08:46:05  4 of 4 ERROR creating sql view model main.agg_zone_hour ........................ [[31mERROR[0m in 0.36s]
+[0m08:46:05  
+[0m08:46:05  [33mExited because of keyboard interrupt[0m
+[0m08:46:05  
+[0m08:46:05  [[31mERROR[0m]: in model agg_zone_hour (models/marts/agg_zone_hour.sql)
+[0m08:46:05    Runtime Error in model agg_zone_hour (models/marts/agg_zone_hour.sql)
+  Not implemented Error: Cannot switch temporary directory after the current one has been used
+[0m08:46:05  
+[0m08:46:05    compiled code at target/compiled/nyc_taxi/models/marts/agg_zone_hour.sql
+[0m08:46:05  
+[0m08:46:05  Done. PASS=3 WARN=0 ERROR=1 SKIP=0 NO-OP=0 REUSED=0 TOTAL=4
+[0m08:46:05  
+[0m08:46:05  Finished running 3 table models, 1 view model in 0 hours 0 minutes and 35.49 seconds (35.49s).
+[0m08:46:05  [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  Not implemented Error: Cannot switch temporary directory after the current one has been used

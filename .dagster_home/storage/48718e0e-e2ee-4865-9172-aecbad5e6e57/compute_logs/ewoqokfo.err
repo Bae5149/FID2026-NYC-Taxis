@@ -1,0 +1,24 @@
+2026-11-24 08:03:51 +0000 - dagster - DEBUG - __ASSET_JOB - 48718e0e-e2ee-4865-9172-aecbad5e6e57 - 114058 - LOGS_CAPTURED - Capturing logs for process (pid: 114058).
+2026-11-24 08:03:51 +0000 - dagster - DEBUG - __ASSET_JOB - 48718e0e-e2ee-4865-9172-aecbad5e6e57 - 114058 - dbt_quality - STEP_START - Started execution of step "dbt_quality".
+2026-11-24 08:03:51 +0000 - dagster - ERROR - __ASSET_JOB - 48718e0e-e2ee-4865-9172-aecbad5e6e57 - 114058 - dbt_quality - STEP_FAILURE - Execution of step "dbt_quality" failed.
+
+dagster._core.errors.DagsterExecutionStepExecutionError: Error occurred while executing op "dbt_quality"::
+
+ValueError: Invalid format specifier '"2025-01"' for object of type 'str'
+
+Stack Trace:
+  File "/home/moonie999/miniconda3/envs/nyc-dagster/lib/python3.12/site-packages/dagster/_core/execution/plan/utils.py", line 57, in op_execution_error_boundary
+    yield
+  File "/home/moonie999/miniconda3/envs/nyc-dagster/lib/python3.12/site-packages/dagster/_utils/__init__.py", line 394, in iterate_with_context
+    next_output = next(iterator)
+                  ^^^^^^^^^^^^^^
+  File "/home/moonie999/miniconda3/envs/nyc-dagster/lib/python3.12/site-packages/dagster/_core/execution/plan/compute_generator.py", line 136, in _coerce_op_compute_fn_to_iterator
+    result = invoke_compute_fn(
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/moonie999/miniconda3/envs/nyc-dagster/lib/python3.12/site-packages/dagster/_core/execution/plan/compute_generator.py", line 116, in invoke_compute_fn
+    return fn(context, **args_to_pass) if context_arg_provided else fn(**args_to_pass)
+                                                                    ^^^^^^^^^^^^^^^^^^
+  File "/home/moonie999/proyectosFID/nyc-taxis-pipeline/dagster_project/assets.py", line 91, in dbt_quality
+    --vars '{"mes":"{mes}"}'
+            ^^^^^^^^^^^^^^^
+

@@ -1,0 +1,49 @@
+[0m08:21:13  Running with dbt=1.12.7
+[0m08:21:14  Registered adapter: duckdb=1.10.0
+[0m08:21:14  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m08:21:17  Found 11 models, 10 data tests, 484 macros
+[0m08:21:17  
+[0m08:21:17  Concurrency: 1 threads (target='dev')
+[0m08:21:17  
+[0m08:21:18  1 of 3 START sql external model main.curated_yellow_trips ...................... [RUN]
+[0m08:21:18  1 of 3 ERROR creating sql external model main.curated_yellow_trips ............. [[31mERROR[0m in 0.17s]
+[0m08:21:18  2 of 3 START sql external model main.dq_reconciliation ......................... [RUN]
+[0m08:21:18  2 of 3 ERROR creating sql external model main.dq_reconciliation ................ [[31mERROR[0m in 0.07s]
+[0m08:21:18  3 of 3 START sql external model main.quarantine_yellow_trips ................... [RUN]
+[0m08:21:18  3 of 3 ERROR creating sql external model main.quarantine_yellow_trips .......... [[31mERROR[0m in 0.05s]
+[0m08:21:18  
+[0m08:21:18  Finished running 3 external models in 0 hours 0 minutes and 0.51 seconds (0.51s).
+[0m08:21:18  
+[0m08:21:18  [31mCompleted with 3 errors, 0 partial successes, and 0 warnings:[0m
+[0m08:21:18  
+[0m08:21:18  [[31mERROR[0m]: in model curated_yellow_trips (models/data_quality/curated_yellow_trips.sql)
+[0m08:21:18    Runtime Error in model curated_yellow_trips (models/data_quality/curated_yellow_trips.sql)
+  Catalog Error: Table with name stg_yellow_trips does not exist!
+  Did you mean "pg_catalog.pg_settings"?
+  
+  LINE 21:     select * from "dbt_analytics"."main"."stg_yellow_trips"
+                             ^
+[0m08:21:18  
+[0m08:21:18    compiled code at target/compiled/nyc_taxi/models/data_quality/curated_yellow_trips.sql
+[0m08:21:18  
+[0m08:21:18  [[31mERROR[0m]: in model dq_reconciliation (models/data_quality/dq_reconciliation.sql)
+[0m08:21:18    Runtime Error in model dq_reconciliation (models/data_quality/dq_reconciliation.sql)
+  Catalog Error: Table with name stg_yellow_trips does not exist!
+  Did you mean "pg_catalog.pg_settings"?
+  
+  LINE 24:     select * from "dbt_analytics"."main"."stg_yellow_trips"
+                             ^
+[0m08:21:18  
+[0m08:21:18    compiled code at target/compiled/nyc_taxi/models/data_quality/dq_reconciliation.sql
+[0m08:21:18  
+[0m08:21:18  [[31mERROR[0m]: in model quarantine_yellow_trips (models/data_quality/quarantine_yellow_trips.sql)
+[0m08:21:18    Runtime Error in model quarantine_yellow_trips (models/data_quality/quarantine_yellow_trips.sql)
+  Catalog Error: Table with name stg_yellow_trips does not exist!
+  Did you mean "pg_catalog.pg_settings"?
+  
+  LINE 21:     select * from "dbt_analytics"."main"."stg_yellow_trips"
+                             ^
+[0m08:21:18  
+[0m08:21:18    compiled code at target/compiled/nyc_taxi/models/data_quality/quarantine_yellow_trips.sql
+[0m08:21:18  
+[0m08:21:18  Done. PASS=0 WARN=0 ERROR=3 SKIP=0 NO-OP=0 REUSED=0 TOTAL=3

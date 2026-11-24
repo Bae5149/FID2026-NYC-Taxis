@@ -1,0 +1,23 @@
+[0m09:05:08  Running with dbt=1.12.7
+[0m09:05:09  Registered adapter: duckdb=1.10.0
+[0m09:05:09  Unable to do partial parsing because config vars, config profile, or config target have changed
+[0m09:05:12  Found 11 models, 10 data tests, 484 macros
+[0m09:05:12  
+[0m09:05:12  Concurrency: 1 threads (target='dev')
+[0m09:05:12  
+[0m09:05:12  1 of 5 START sql view model main.stg_taxi_zones ................................ [RUN]
+[0m09:05:12  1 of 5 OK created sql view model main.stg_taxi_zones ........................... [[32mOK[0m in 0.13s]
+[0m09:05:12  2 of 5 START sql view model main.stg_yellow_trips .............................. [RUN]
+[0m09:05:12  2 of 5 OK created sql view model main.stg_yellow_trips ......................... [[32mOK[0m in 0.12s]
+[0m09:05:12  3 of 5 START sql external model main.curated_yellow_trips ...................... [RUN]
+[0m09:05:30  3 of 5 OK created sql external model main.curated_yellow_trips ................. [[32mOK[0m in 17.58s]
+[0m09:05:30  4 of 5 START sql external model main.dq_reconciliation ......................... [RUN]
+[0m09:05:36  4 of 5 OK created sql external model main.dq_reconciliation .................... [[32mOK[0m in 6.31s]
+[0m09:05:36  5 of 5 START sql external model main.quarantine_yellow_trips ................... [RUN]
+[0m09:05:44  5 of 5 OK created sql external model main.quarantine_yellow_trips .............. [[32mOK[0m in 7.43s]
+[0m09:05:44  
+[0m09:05:44  Finished running 3 external models, 2 view models in 0 hours 0 minutes and 31.88 seconds (31.88s).
+[0m09:05:44  
+[0m09:05:44  [32mCompleted successfully[0m
+[0m09:05:44  
+[0m09:05:44  Done. PASS=5 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=5
