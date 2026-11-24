@@ -15,3 +15,5 @@ __pycache__/
 .pytest_cache/
 dbt/.user.yml
 logs/*.log
+.dagster_home/
+.tmp_dagster_home_*
