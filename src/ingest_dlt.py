@@ -88,9 +88,6 @@ def procesar_mes(mes: str):
 
     table = pq.read_table(destino)
 
-    print(type(table))
-    print(table.num_rows)
-
     yield table
 
 @dlt.resource(name="taxi_zones", write_disposition="replace")

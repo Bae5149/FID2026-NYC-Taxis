@@ -1,7 +1,7 @@
 {{ config(materialized='ephemeral') }}
 
 {# Umbrales configurables (ajustables aqui o via --vars en dbt) #}
-{% set max_distancia_millas = var('max_distancia_millas', 200.0) %}
+{% set max_distancia_millas = var('max_distancia_millas', 100.0) %}
 {% set max_velocidad_mph = var('max_velocidad_mph', 80.0) %}
 
 with trips as (
