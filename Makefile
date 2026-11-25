@@ -4,27 +4,27 @@ MES ?= 2025-03
 # Exportamos MES para que Dagster y Docker la hereden
 export MES
 
-.PHONY: all install up down pipeline test dashboards clean dagster-ui
+.PHONY: all install up down pipeline test shaper-up clean dagster-ui
 
-# 1. Comando único
+#  Comando único
 all: up pipeline
 
-# 2.  Servicios permanentes
+#   Servicios permanentes
 up:
 	@echo "Levantando servicios en segundo plano..."
 	docker compose up -d
 
-# 3. Apagar servicios y eliminar contenedores huérfanos
+#  Apagar servicios y eliminar contenedores huérfanos
 down:
 	@echo "Apagando servicios..."
 	docker compose down --remove-orphans
 
-# 4. Construir la imagen del pipeline (dlt + dbt + duckdb)
+#  Construir la imagen del pipeline (dlt + dbt + duckdb)
 install:
 	@echo "Construyendo imagen de Docker del pipeline..."
 	docker compose build pipeline
 
-# 5. Pipeline orquestado por Dagster: ingesta (dlt), validación de esquema, calidad/cuarentena y modelos (dbt) para $(MES) y su par 2024
+#  Pipeline orquestado por Dagster: ingesta (dlt), validación de esquema, calidad/cuarentena y modelos (dbt) para $(MES) y su par 2024
 pipeline:
 	@echo "Ejecutando pipeline completo para el mes $(MES) mediante Dagster..."
 
@@ -33,20 +33,16 @@ pipeline:
 	DAGSTER_HOME=$(PWD)/.dagster_home \
 	conda run -n nyc-dagster \
 	MES=$(MES) dagster asset materialize \
-	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned,dbt_marts" \
+	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned,dbt_marts,shaper_dashboard" \
 	-m dagster_project.definitions
 
-# 6. Ejecutar suite de tests automatizados (pytest: calidad sintética, idempotencia y reconciliación)
+#  Ejecutar suite de tests automatizados (pytest: calidad sintética, idempotencia y reconciliación)
 test:
 	@echo "Ejecutando tests automatizados..."
 	docker compose run --rm -e MES=$(MES) pipeline pytest tests/
 
-# 7. Dashboards Evidence
-dashboards:
-	@echo "Generando dashboards estáticos de Evidence..."
-	docker compose run --rm evidence_build
 
-# 8. Limpieza profunda de contenedores, volúmenes y base DuckDB local
+#  Limpieza profunda de contenedores, volúmenes y base DuckDB local
 clean:
 	@echo "Limpiando entorno y base de datos local..."
 	docker compose down -v --remove-orphans
@@ -58,6 +54,10 @@ clean:
   -v $(PWD)/data:/data \
   alpine \
   sh -c "rm -rf /data/curated_hive"
+
+shaper-up:
+	@echo "Recreando el servicio Shaper con los datos más recientes..."
+	docker compose up -d --force-recreate shaper
 
 dagster-ui:
 	@echo "Abriendo interfaz de Dagster..."

@@ -6,6 +6,7 @@ from .assets import (
     dbt_quality,
     curate_partitioned,
     dbt_marts,
+    shaper_dashboard,
 )
 
 defs = Definitions(
@@ -15,5 +16,6 @@ defs = Definitions(
         dbt_quality,
         curate_partitioned,
         dbt_marts,
+        shaper_dashboard,
     ]
 )

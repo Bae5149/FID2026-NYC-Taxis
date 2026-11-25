@@ -9,17 +9,6 @@ x-logging: &logging            # evita que los logs crezcan sin límite en disco
 services:
   # --- SIEMPRE ENCENDIDOS (consumo mínimo) ---
 
-  web:                          # sirve el sitio estático de Evidence
-    image: nginx:1.27-alpine
-    container_name: evidence_web_nyc
-    ports:
-      - "127.0.0.1:3000:80"     # solo accesible desde tu PC
-    volumes:
-      - site:/usr/share/nginx/html:ro
-    mem_limit: 32m
-    restart: unless-stopped
-    logging: *logging
-
   dozzle:                       # logs en vivo de todos los contenedores
     image: amir20/dozzle:latest # conviene fijar una versión una vez que veas cuál funciona
     container_name: dozzle_nyc
@@ -30,6 +19,22 @@ services:
     environment:
       DOZZLE_NO_ANALYTICS: "true"
     mem_limit: 64m
+    restart: unless-stopped
+    logging: *logging
+
+  shaper:
+    image: taleshape/shaper:latest
+    container_name: shaper_nyc
+    ports:
+      - "127.0.0.1:5454:5454"
+    volumes:
+      - ./data:/data
+      - ./dashboards:/dashboards
+      - shaper_state:/var/lib/shaper
+    command: >     
+      --dir /var/lib/shaper
+      --init-sql "ATTACH '/data/dbt_analytics.duckdb' AS dbt_analytics (READ_ONLY);"
+    mem_limit: 1g             # Límite generoso; en reposo consumirá mucho menos
     restart: unless-stopped
     logging: *logging
 
@@ -58,29 +63,5 @@ services:
     restart: "no"
     logging: *logging
 
-  evidence_build:               # genera el sitio estático y lo copia al volumen
-    profiles: ["job"]
-    image: node:20-slim         # slim (Debian) y no alpine: DuckDB trae binarios para glibc
-    container_name: evidence_build_nyc
-    working_dir: /project
-    volumes:
-      - ./evidence:/project
-      - evidence_modules:/project/node_modules
-      - ./data:/data:ro
-      - site:/site
-    environment:
-      NODE_OPTIONS: "--max-old-space-size=1024"
-      EVIDENCE_TELEMETRY_DISABLED: "true"
-    command: >
-      sh -c "npm ci --no-audit --no-fund &&
-             npm run sources &&
-             npm run build &&
-             rm -rf /site/* &&
-             cp -r build/. /site/"
-    mem_limit: 1536m
-    restart: "no"
-    logging: *logging
-
 volumes:
-  site:
-  evidence_modules:
+  shaper_state:
