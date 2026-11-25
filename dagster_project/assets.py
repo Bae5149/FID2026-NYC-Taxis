@@ -12,6 +12,8 @@ def get_mes() -> str:
 )
 def ingesta_dlt():
 
+    subprocess.run(["docker", "compose", "stop", "shaper"], check=False)
+
     mes = get_mes()
 
     subprocess.run(
@@ -148,6 +150,23 @@ def dbt_marts():
             "marts",
             "--vars",
             f'{{"mes":"{mes}"}}'
+        ],
+        check=True,
+    )
+
+@asset(
+    deps=[dbt_marts],
+    description="Levanta y refresca el servicio de visualización Shaper con los datos actualizados."
+)
+def shaper_dashboard():
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "up",
+            "-d",
+            "--force-recreate",
+            "shaper",
         ],
         check=True,
     )

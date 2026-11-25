@@ -16,4 +16,4 @@ __pycache__/
 dbt/.user.yml
 logs/*.log
 .dagster_home/
-.tmp_dagster_home_*
+.tmp_dagster_home_*shaper_state/

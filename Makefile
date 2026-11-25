@@ -4,7 +4,7 @@ MES ?= 2025-03
 # Exportamos MES para que Dagster y Docker la hereden
 export MES
 
-.PHONY: all install up down pipeline test dashboards clean dagster-ui
+.PHONY: all install up down pipeline test run-queries clean dagster-ui
 
 # 1. Comando único
 all: up pipeline
@@ -33,7 +33,7 @@ pipeline:
 	DAGSTER_HOME=$(PWD)/.dagster_home \
 	conda run -n nyc-dagster \
 	MES=$(MES) dagster asset materialize \
-	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned,dbt_marts" \
+	--select "ingesta_dlt,schema_contract,dbt_quality,curate_partitioned,dbt_marts,shaper_dashboard" \
 	-m dagster_project.definitions
 
 # 6. Ejecutar suite de tests automatizados (pytest: calidad sintética, idempotencia y reconciliación)
@@ -41,10 +41,6 @@ test:
 	@echo "Ejecutando tests automatizados..."
 	docker compose run --rm -e MES=$(MES) pipeline pytest tests/
 
-# 7. Dashboards Evidence
-dashboards:
-	@echo "Generando dashboards estáticos de Evidence..."
-	docker compose run --rm evidence_build
 
 # 8. Limpieza profunda de contenedores, volúmenes y base DuckDB local
 clean:
@@ -58,6 +54,10 @@ clean:
   -v $(PWD)/data:/data \
   alpine \
   sh -c "rm -rf /data/curated_hive"
+
+shaper-up:
+	@echo "Recreando el servicio Shaper con los datos más recientes..."
+	docker compose up -d --force-recreate shaper
 
 dagster-ui:
 	@echo "Abriendo interfaz de Dagster..."
