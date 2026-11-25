@@ -45,8 +45,11 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
         ▼  (5. Modelado Analítico dbt)
   [dbt marts] ────────► fact_trips, dim_zone, dim_date, agg_zone_hour
         │
-        ▲
-[Orquestación y Observabilidad: Dagster UI + Evidence.dev / Dozzle]
+        ▼
+  [Shaper] ────────────► Dashboard analítico
+
+[Dagster] orquesta las etapas hasta la generación del dashboard
+[Dagster UI + Dozzle] permiten monitorear corridas y logs
 ```
 
 ### Herramientas Seleccionadas
@@ -57,9 +60,9 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 
 **Transformación, Calidad y Modelado (`dbt-duckdb`):** Modelos SQL modulares, pruebas automatizadas de calidad, separación de registros en cuarentena y construcción de los modelos dimensionales y agregados en la capa `marts`.
 
-**Orquestación (`Dagster`):** Definición de *Software-Defined Assets* propios, control de dependencias, reintentos. Los modelos dbt se ejecutan mediante assets personalizados utilizando `subprocess.run(...)`
+**Orquestación (`Dagster`):** Definición de *Software-Defined Assets* propios, control de dependencias y reintentos. Dagster ejecuta los pasos del pipeline en orden, incluyendo la creación del dashboard con Shaper una vez materializados los modelos analíticos.
 
-**Observabilidad Liviana (`Dagster UI` + `Evidence.dev` / `Dozzle`):** Monitoreo de corridas, dashboards históricos en SQL sobre archivos estáticos y visualización de logs de contenedores con bajo consumo de memoria en reposo.
+**Dashboards y Observabilidad (`Shaper` + `Dagster UI` / `Dozzle`):** Shaper genera el dashboard a partir de los datos y modelos analíticos del proyecto. Dagster orquesta su creación como parte del flujo, y su interfaz permite monitorear las corridas; Dozzle permite visualizar los logs de contenedores.
 
 **Entorno y Despliegue (`Docker` + `Conda`):** El entorno base de Python se gestiona con Conda (conda activate nyc-dagster), para evitar conflictos de version con dependencias de python/dagster. Los servicios de infraestructura y ejecución se contenerizan con Docker para un despliegue portable, mientras se mantiene su visibilidad en Dozzle.
 
@@ -78,7 +81,7 @@ El pipeline garantiza la invariante de reconciliación de datos: **todo registro
 │   ├── tests/
 │   ├── dbt_project.yml
 │   └── profiles.yml
-├── evidence/                       # Dashboards estáticos (Evidence.dev)
+├── dashboards/                         # Proyecto y dashboards generados con Shaper
 ├── dagster_project/
 │   ├── assets.py                   # Assets propios (subprocess.run)
 │   └── definitions.py
@@ -124,7 +127,7 @@ pip install -r requirements.txt
 make all MES=2025-03
 ```
 
-Este comando levanta los servicios de docker y orquesta secuencialmente los 5 assets de Dagster:
+Este comando levanta los servicios de Docker y orquesta secuencialmente el pipeline mediante Dagster, incluyendo la generación del dashboard Shaper:
 
 1. Levantamiento de servicios de apoyo y ejecución del pipeline para el mes indicado y su comparación con 2024.
 2. ingesta_dlt: Descarga idempotente y validación de hash SHA-256.
@@ -132,6 +135,7 @@ Este comando levanta los servicios de docker y orquesta secuencialmente los 5 as
 4. dbt_quality: Reglas de calidad, cuarentena y reconciliación. con `dbt` + `DuckDB`.
 5. curate_partitioned: Generación de Hive Parquet particionado y enriquecimiento. (`src/curate_partitioned.py` -> `data/curated_hive/`) 
 6. dbt_marts: Materialización del esquema estrella y agregados.
+7. Dashboard Shaper: Generación del dashboard con los datos analíticos materializados.
 
 ### 3. Ejecución de Tests Automatizados
 
@@ -147,6 +151,7 @@ dbt test --project-dir dbt_project --profiles-dir dbt_project --select intermedi
 3. **Calidad y Cuarentena (`dbt`):** Evalúa las reglas de negocio definidas. Los registros que violan reglas de severidad `rechazo` pasan a `quarantine_trips` (guardando la fila original, archivo origen y las reglas violadas); los de severidad `advertencia` se marcan en una columna de flags sin descartar la fila. Se genera el reporte `dq_reconciliation`.
 4. **Transformación y Almacenamiento (`src/curate_partitioned.py`):** Lee `data/curated/curated_yellow_trips.parquet` para el mes solicitado (`--mes AAAA-MM`) y su par interanual (`(AAAA-1)-MM`), elimina únicamente esas particiones en `data/curated_hive/` si existen (o crea las carpetas si son meses nuevos), calcula métricas derivadas (`duracion_minutos`, `velocidad_promedio_mph`, `fecha_subida`, `hora_subida`, `dia_semana_num`, `dia_semana_nombre`, `porcentaje_propina_tarifa`), realiza el doble `LEFT JOIN` contra `data/raw/taxi_zone_lookup.csv` (`pu_*` y `do_*`) y escribe Parquet particionado por `(year, month)` en `data/curated_hive/`.
 5. **Modelado y preguntas (`dbt`):** Construye los modelos `fact_trips`, `dim_zone`, `dim_date` y `agg_zone_hour`. Deja preparadas estas tablas para ser utilizadas por las consultas planteadas en el parcial. No obstante, los resultados de ejecucion de estas ultimas, correspondientes a la comparacion de del mes 06 del 2025 y del 2024, estan documentadas en `RESULTADOS.md`.
+6. **Generación del dashboard (`Shaper`):** Shaper genera el dashboard a partir de los datos y modelos analíticos materializados. Dagster orquesta este paso al final del flujo, después de la construcción de los modelos dbt, y permite monitorear su ejecución desde Dagster UI.
 
 ## Decisiones Técnicas y de Negocio
 
@@ -209,6 +214,8 @@ Adicionalmente, sobre los modelos `intermediate` en `dbt` se configuran pruebas 
 ## Modelado Dimensional (Esquema Estrella)
 
 Los modelos del esquema estrella y la tabla agregada se organizan como modelos `marts` en `dbt` a partir de `data/curated_hive/**/*.parquet`. Según las necesidades de memoria y consulta, la carpeta `intermediate` puede configurarse como `view` o `table` en `dbt_project.yml` (y usar `{{ config(materialized='ephemeral') }}` en modelos puntuales que convenga inyectar como CTE).
+
+Una vez materializados, estos modelos alimentan el dashboard generado con Shaper. Dagster orquesta la generación como etapa final del pipeline.
 
 Tabla / Modelo | Granularidad (qué representa una fila) | Clave / Agrupación principal
 
