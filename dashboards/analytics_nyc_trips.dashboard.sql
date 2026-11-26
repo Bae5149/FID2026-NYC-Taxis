@@ -6,7 +6,7 @@
 -- ============================================================================
 SELECT 'a) Top 10 Zonas de Origen (Actual vs Anterior)'::SECTION;
 
--- Gráfico de barras comparativo (Actual vs Anterior)
+-- Gráfico de barras: una fila por zona y por mes, la serie se define con CATEGORY
 WITH viajes AS (
     SELECT
         dz.zona,
@@ -19,20 +19,30 @@ WITH viajes AS (
 comparacion AS (
     SELECT
         zona,
-        MAX(CASE WHEN es_mes_solicitado = TRUE THEN total_viajes END) AS viajes_actual,
-        MAX(CASE WHEN es_mes_solicitado = FALSE THEN total_viajes END) AS viajes_anterior
+        COALESCE(MAX(CASE WHEN es_mes_solicitado THEN total_viajes END), 0) AS viajes_actual,
+        COALESCE(MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END), 0) AS viajes_anterior
     FROM viajes
     GROUP BY zona
+),
+top10 AS (
+    -- el ranking se calcula una sola vez para que las barras sigan el mismo orden
+    SELECT *, ROW_NUMBER() OVER (ORDER BY viajes_actual DESC) AS ranking
+    FROM comparacion
+    QUALIFY ranking <= 10
+),
+largo AS (
+    SELECT ranking, zona, 'Mes Actual' AS serie, viajes_actual AS viajes FROM top10
+    UNION ALL
+    SELECT ranking, zona, 'Mes Anterior' AS serie, viajes_anterior AS viajes FROM top10
 )
 SELECT
-    zona::XAXIS AS "Zona",
-    viajes_actual::BARCHART AS "Viajes Actual",
-    viajes_anterior::BARCHART AS "Viajes Anterior"
-FROM comparacion
-ORDER BY viajes_actual DESC
-LIMIT 10;
+    zona::XAXIS,
+    serie::CATEGORY,
+    viajes::BARCHART
+FROM largo
+ORDER BY ranking, serie DESC;
 
--- Tabla complementaria con el porcentaje de variación detallado
+-- Tabla complementaria con la variación porcentual (sin cambios)
 WITH viajes AS (
     SELECT
         dz.zona,
@@ -59,24 +69,41 @@ FROM comparacion
 ORDER BY viajes_actual DESC
 LIMIT 10;
 
-
 -- ============================================================================
 -- B) Hora del día con mayor ingreso promedio por viaje
 -- ============================================================================
 SELECT 'b) Ingreso Promedio por Hora del Día'::SECTION;
 
--- KPI destacado
-SELECT
-    'Hora Pico de Ingreso (5:00 AM)'::LABEL,
-    ROUND(AVG(total_amount), 2)::GAUGE
-FROM dbt_analytics.fact_trips
-WHERE es_mes_solicitado = TRUE
-  AND hora_subida = 5;
+-- KPI: mayor ingreso promedio entre todas las horas del día (valor único)
+WITH por_hora AS (
+    SELECT
+        hora_subida,
+        ROUND(AVG(total_amount), 2) AS ingreso_promedio
+    FROM dbt_analytics.fact_trips
+    WHERE es_mes_solicitado = TRUE
+    GROUP BY hora_subida
+)
+SELECT MAX(ingreso_promedio) AS "Mayor Ingreso Promedio (USD)"
+FROM por_hora;
+
+-- KPI: hora en la que ocurre ese máximo (valor único)
+WITH por_hora AS (
+    SELECT
+        hora_subida,
+        ROUND(AVG(total_amount), 2) AS ingreso_promedio
+    FROM dbt_analytics.fact_trips
+    WHERE es_mes_solicitado = TRUE
+    GROUP BY hora_subida
+)
+SELECT hora_subida AS "Hora Pico de Ingreso"
+FROM por_hora
+ORDER BY ingreso_promedio DESC
+LIMIT 1;
 
 -- Gráfico de línea para ver la tendencia a lo largo de las horas
 SELECT
-    hora_subida::XAXIS AS "Hora del Día",
-    ROUND(AVG(total_amount), 2)::LINECHART AS "Ingreso Promedio (USD)"
+    hora_subida::XAXIS,
+    ROUND(AVG(total_amount), 2)::LINECHART
 FROM dbt_analytics.fact_trips
 WHERE es_mes_solicitado = TRUE
 GROUP BY hora_subida

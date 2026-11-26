@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 import requests
+import json
 from dagster import asset, AssetExecutionContext
 
 
@@ -183,8 +184,8 @@ def shaper_dashboard(context: AssetExecutionContext):
 
     shaper_url = os.getenv("SHAPER_URL", "http://127.0.0.1:5454")
     dashboards_dir = Path("dashboards")
+    state_file = dashboards_dir / ".shaper_ids.json"
 
-    # Esperar hasta que el puerto/servidor HTTP de Shaper responda (no solo 200 en GET /api/dashboards)
     last_error = None
     for _ in range(60):
         try:
@@ -204,6 +205,10 @@ def shaper_dashboard(context: AssetExecutionContext):
     if not sql_files:
         raise FileNotFoundError(f"No hay archivos .sql en {dashboards_dir.resolve()}")
 
+    saved_ids = {}
+    if state_file.exists():
+        saved_ids = json.loads(state_file.read_text(encoding="utf-8"))
+
     for sql_file in sql_files:
         title = sql_file.stem.replace("_", " ").title()
         payload = {
@@ -211,16 +216,41 @@ def shaper_dashboard(context: AssetExecutionContext):
             "content": sql_file.read_text(encoding="utf-8").strip(),
         }
 
-        resp = requests.post(
-            f"{shaper_url}/api/dashboards",
-            json=payload,
-            timeout=10,
-        )
+        dash_id = saved_ids.get(title)
+
+        if dash_id:
+            resp = requests.post(
+                f"{shaper_url}/api/dashboards/{dash_id}",
+                json=payload,
+                timeout=10,
+            )
+            # Si el ID guardado ya no existe en SQLite (ej. volumen recreado), crear de nuevo
+            if resp.status_code == 404:
+                dash_id = None
+
+        if not dash_id:
+            resp = requests.post(
+                f"{shaper_url}/api/dashboards",
+                json=payload,
+                timeout=10,
+            )
+            if resp.status_code == 400 and "already exists" in resp.text.lower():
+                context.log.warning(
+                    f"Dashboard '{title}' ya existe en Shaper; se omite creación duplicada."
+                )
+                continue
+
         if resp.status_code >= 400:
             raise RuntimeError(
-                f"Error al crear/enviar '{title}' ({resp.status_code}): {resp.text}"
+                f"Error al sincronizar '{title}' ({resp.status_code}): {resp.text}"
             )
 
+        data = resp.json() if resp.text.strip() else {}
+        if "id" in data:
+            saved_ids[title] = data["id"]
+
         context.log.info(
-            f"Dashboard '{title}' enviado a Shaper ({resp.status_code}): {resp.text.strip()}"
+            f"Dashboard '{title}' sincronizado en Shaper ({resp.status_code})."
         )
+
+    state_file.write_text(json.dumps(saved_ids, indent=2), encoding="utf-8")
