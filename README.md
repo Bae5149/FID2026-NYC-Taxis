@@ -207,7 +207,7 @@ ID Regla | Descripción | Severidad | Umbral / Condición Justificada
 
 `DQ_07` | Filas duplicadas exactas | `Rechazo` | Registros idénticos en todas las columnas de negocio; se conserva la primera ocurrencia.
 
-`DQ_08` | Velocidad promedio irreal | `Rechazo` | Velocidad calculada `> 100 mph`. Detecta inconsistencias entre distancia y duración del viaje.
+`DQ_08` | Velocidad promedio irreal | `Rechazo` | Velocidad calculada `> 80 mph`. Detecta inconsistencias entre distancia y duración del viaje.
 
 Adicionalmente, sobre los modelos `intermediate` en `dbt` se configuran pruebas en `schema.yml` (`unique`, `not_null`, `relationships` hacia `dim_zone` y `dim_date`) y pruebas singulares en `tests/` para verificar la unicidad del grano de `agg_zone_hour` y su reconciliación con `fact_trips`.
 
