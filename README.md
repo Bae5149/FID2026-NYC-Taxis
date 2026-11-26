@@ -118,7 +118,7 @@ cd FID2026-NYC-Taxis
 # Crear y activar entorno Conda
 conda create -n nyc-dagster python=3.12 -y
 conda activate nyc-dagster
-pip install -r requirements.txt
+make install
 ```
 
 ### 2. Ejecución Completa (Comando Único)

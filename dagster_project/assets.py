@@ -1,6 +1,9 @@
-from dagster import asset
+from pathlib import Path
 import os
 import subprocess
+import time
+import requests
+from dagster import asset, AssetExecutionContext
 
 
 def get_mes() -> str:
@@ -123,6 +126,7 @@ def curate_partitioned():
         check=True,
     )
 
+
 @asset(
     deps=[curate_partitioned],
     description="Construcción del modelo analítico."
@@ -154,11 +158,16 @@ def dbt_marts():
         check=True,
     )
 
+
 @asset(
     deps=[dbt_marts],
-    description="Levanta y refresca el servicio de visualización Shaper con los datos actualizados."
+    description="Levanta Shaper y sincroniza los dashboards SQL vía API."
 )
-def shaper_dashboard():
+def shaper_dashboard(context: AssetExecutionContext):
+    mes = get_mes()
+    env = os.environ.copy()
+    env["MES"] = mes
+
     subprocess.run(
         [
             "docker",
@@ -168,5 +177,50 @@ def shaper_dashboard():
             "--force-recreate",
             "shaper",
         ],
+        env=env,
         check=True,
     )
+
+    shaper_url = os.getenv("SHAPER_URL", "http://127.0.0.1:5454")
+    dashboards_dir = Path("dashboards")
+
+    # Esperar hasta que el puerto/servidor HTTP de Shaper responda (no solo 200 en GET /api/dashboards)
+    last_error = None
+    for _ in range(60):
+        try:
+            r = requests.get(f"{shaper_url}/", timeout=2)
+            if r.status_code < 500:
+                break
+            last_error = f"HTTP {r.status_code}: {r.text[:200]}"
+        except requests.RequestException as exc:
+            last_error = str(exc)
+        time.sleep(0.5)
+    else:
+        raise RuntimeError(
+            f"Shaper no respondió en {shaper_url} tras reiniciar. Último error: {last_error}"
+        )
+
+    sql_files = sorted(dashboards_dir.glob("*.sql"))
+    if not sql_files:
+        raise FileNotFoundError(f"No hay archivos .sql en {dashboards_dir.resolve()}")
+
+    for sql_file in sql_files:
+        title = sql_file.stem.replace("_", " ").title()
+        payload = {
+            "name": title,
+            "content": sql_file.read_text(encoding="utf-8").strip(),
+        }
+
+        resp = requests.post(
+            f"{shaper_url}/api/dashboards",
+            json=payload,
+            timeout=10,
+        )
+        if resp.status_code >= 400:
+            raise RuntimeError(
+                f"Error al crear/enviar '{title}' ({resp.status_code}): {resp.text}"
+            )
+
+        context.log.info(
+            f"Dashboard '{title}' enviado a Shaper ({resp.status_code}): {resp.text.strip()}"
+        )

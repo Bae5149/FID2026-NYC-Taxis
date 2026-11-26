@@ -31,6 +31,9 @@ services:
       - ./data:/data
       - ./dashboards:/dashboards
       - shaper_state:/var/lib/shaper
+    environment:
+      - SHAPER_DIR=/var/lib/shaper
+      - SHAPER_DASHBOARD_DIR=/dashboards
     command: >     
       --dir /var/lib/shaper
       --init-sql "ATTACH '/data/dbt_analytics.duckdb' AS dbt_analytics (READ_ONLY);"
