@@ -108,18 +108,42 @@ FROM dbt_analytics.fact_trips
 WHERE es_mes_solicitado = TRUE;
 
 -- c.2 Gráfico de barras para el Top 5 zonas con mayor proporción de CBD Fee
-SELECT
-    dz.zona::XAXIS AS "Zona",
+SELECT 'Viajes totales por zona (con % de viajes CBD)'::LABEL;
+WITH base AS (SELECT
+    dz.zona,
+    COUNT(*) AS viajes_totales,
+    SUM(
+        CASE
+            WHEN f.cbd_congestion_fee > 0
+            THEN 1
+            ELSE 0
+        END
+    ) AS viajes_cbd,
     ROUND(
-        100.0 * SUM(CASE WHEN f.cbd_congestion_fee > 0 THEN 1 ELSE 0 END) / COUNT(*),
+        100.0 *
+        SUM(
+            CASE
+                WHEN f.cbd_congestion_fee > 0
+                THEN 1
+                ELSE 0
+            END
+        )
+        / COUNT(*),
         2
-    )::BARCHART AS "Proporción CBD (%)"
+    ) AS proporcion_pct
 FROM dbt_analytics.fact_trips f
-JOIN dbt_analytics.dim_zone dz ON f.pu_location_id = dz.location_id
+JOIN dbt_analytics.dim_zone dz
+    ON f.pu_location_id = dz.location_id
 WHERE f.es_mes_solicitado = TRUE
 GROUP BY dz.zona
 HAVING COUNT(*) > 100
-ORDER BY "Proporción CBD (%)" DESC
+ORDER BY proporcion_pct DESC
+LIMIT 5)
+SELECT
+  (zona || ' (' || proporcion_pct || ' %)')::XAXIS,
+  viajes_totales::BARCHART
+FROM base
+ORDER BY proporcion_pct DESC
 LIMIT 5;
 
 -- Tabla detallada del Top 5 zonas CBD
@@ -198,41 +222,40 @@ ORDER BY "Cantidad de Viajes" DESC;
 -- ============================================================================
 SELECT 'f) Resumen General: Actual vs 2024'::SECTION;
 
--- KPI 1: Variación porcentual de viajes
+-- 1. Tabla con píldoras de Tendencia (::TREND espera el ratio Actual / 2024, donde 1.0 = 0%)
 WITH resumen AS (
     SELECT
         es_mes_solicitado,
-        COUNT(*) AS total_viajes
-    FROM dbt_analytics.fact_trips
-    GROUP BY es_mes_solicitado
-)
-SELECT
-    'Variación Total de Viajes (%)'::LABEL,
-    ROUND(
-        100.0 * (MAX(CASE WHEN es_mes_solicitado THEN total_viajes END) - MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END))
-        / MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END),
-        2
-    )::GAUGE
-FROM resumen;
-
--- KPI 2: Variación porcentual de tarifa media
-WITH resumen AS (
-    SELECT
-        es_mes_solicitado,
+        COUNT(*) AS total_viajes,
         AVG(fare_amount) AS tarifa_media
     FROM dbt_analytics.fact_trips
     GROUP BY es_mes_solicitado
+),
+ratios AS (
+    SELECT
+        ROUND(
+            MAX(CASE WHEN es_mes_solicitado THEN total_viajes END) * 1.0
+            / NULLIF(MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END), 0),
+            4
+        ) AS ratio_viajes,
+        ROUND(
+            MAX(CASE WHEN es_mes_solicitado THEN tarifa_media END) * 1.0
+            / NULLIF(MAX(CASE WHEN NOT es_mes_solicitado THEN tarifa_media END), 0),
+            4
+        ) AS ratio_tarifa
+    FROM resumen
 )
 SELECT
-    'Variación Tarifa Media (%)'::LABEL,
-    ROUND(
-        100.0 * (MAX(CASE WHEN es_mes_solicitado THEN tarifa_media END) - MAX(CASE WHEN NOT es_mes_solicitado THEN tarifa_media END))
-        / MAX(CASE WHEN NOT es_mes_solicitado THEN tarifa_media END),
-        2
-    )::GAUGE
-FROM resumen;
+    'Crecimiento de Viajes vs 2024'::LABEL AS "Métrica",
+    ratio_viajes::TREND AS "Variación (%)"
+FROM ratios
+UNION ALL
+SELECT
+    'Variación de Tarifa Media vs 2024'::LABEL AS "Métrica",
+    ratio_tarifa::TREND AS "Variación (%)"
+FROM ratios;
 
--- Tabla resumen general comparativa
+-- 2. Tabla resumen general comparativa exacta
 WITH resumen AS (
     SELECT
         es_mes_solicitado,
@@ -243,7 +266,7 @@ WITH resumen AS (
 )
 SELECT
     MAX(CASE WHEN es_mes_solicitado = TRUE THEN total_viajes END) AS "Viajes Actual",
-    MAX(CASE WHEN es_mes_solicitado = FALSE THEN total_viajes END) AS "Viajes Anterior",
+    MAX(CASE WHEN es_mes_solicitado = FALSE THEN total_viajes END) AS "Viajes 2024",
     ROUND(
         100.0 * (MAX(CASE WHEN es_mes_solicitado THEN total_viajes END) - MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END))
         / MAX(CASE WHEN NOT es_mes_solicitado THEN total_viajes END),
@@ -255,3 +278,53 @@ SELECT
         2
     ) AS "Variación Tarifa (%)"
 FROM resumen;
+
+-- ============================================================================
+-- G) Reconciliación de Calidad de Datos: Curated vs Cuarentena
+-- ============================================================================
+SELECT 'g) Reconciliación y Distribución: Curated vs Cuarentena'::SECTION;
+
+-- 1. Gráfico de barras apiladas por mes (Curated y Cuarentena formando una única barra por mes)
+WITH desglose AS (
+    SELECT
+        CAST(periodo_mes AS VARCHAR) AS periodo,
+        '1. Curated (Limpios)' AS estado,
+        filas_limpias AS cantidad
+    FROM dbt_analytics.dq_reconciliation
+    UNION ALL
+    SELECT
+        CAST(periodo_mes AS VARCHAR) AS periodo,
+        '2. Cuarentena (Rechazados)' AS estado,
+        filas_cuarentena AS cantidad
+    FROM dbt_analytics.dq_reconciliation
+)
+SELECT
+    periodo::XAXIS AS "Periodo",
+    estado::CATEGORY AS "Estado",
+    cantidad::BARCHART AS "Filas"
+FROM desglose
+ORDER BY periodo ASC, estado ASC;
+
+-- 2. Tabla de validación matemática y porcentual
+WITH conteo_curated AS (
+    SELECT periodo_mes, COUNT(*) AS filas_curated_real
+    FROM dbt_analytics.curated_yellow_trips
+    GROUP BY periodo_mes
+),
+conteo_quarantine AS (
+    SELECT periodo_mes, COUNT(*) AS filas_quarantine_real
+    FROM dbt_analytics.quarantine_yellow_trips
+    GROUP BY periodo_mes
+)
+SELECT
+    CAST(r.periodo_mes AS VARCHAR) AS "Periodo",
+    r.filas_leidas AS "Total Original",
+    COALESCE(c.filas_curated_real, 0) AS "Filas Curated",
+    COALESCE(q.filas_quarantine_real, 0) AS "Filas Cuarentena",
+    (COALESCE(c.filas_curated_real, 0) + COALESCE(q.filas_quarantine_real, 0)) AS "Suma (Curated + Cuarentena)",
+    ROUND(100.0 * COALESCE(c.filas_curated_real, 0) / NULLIF(r.filas_leidas, 0), 2) AS "% Curated",
+    ROUND(100.0 * COALESCE(q.filas_quarantine_real, 0) / NULLIF(r.filas_leidas, 0), 2) AS "% Cuarentena"
+FROM dbt_analytics.dq_reconciliation r
+LEFT JOIN conteo_curated c ON r.periodo_mes = c.periodo_mes
+LEFT JOIN conteo_quarantine q ON r.periodo_mes = q.periodo_mes
+ORDER BY r.periodo_mes DESC;

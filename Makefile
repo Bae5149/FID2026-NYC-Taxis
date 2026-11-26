@@ -23,6 +23,7 @@ down:
 install:
 	@echo "Construyendo imagen de Docker del pipeline..."
 	docker compose build pipeline
+	pip install -r requirements-dagster.txt
 
 #  Pipeline orquestado por Dagster: ingesta (dlt), validación de esquema, calidad/cuarentena y modelos (dbt) para $(MES) y su par 2024
 pipeline:
@@ -57,7 +58,9 @@ clean:
 
 shaper-up:
 	@echo "Recreando el servicio Shaper con los datos más recientes..."
-	docker compose up -d --force-recreate shaper
+	MES=$(or $(MES),2025-04) docker compose up -d --force-recreate shaper
+	@python -c 'import glob, json, os, time, urllib.request, urllib.error; from pathlib import Path; url = os.getenv("SHAPER_URL", "http://127.0.0.1:5454"); [time.sleep(0.5) for _ in range(60) if (lambda: (_ for _ in ()).throw(Exception()))()] if False else None' 2>/dev/null || true
+	@python -c 'import glob, json, os, time, urllib.request, urllib.error; from pathlib import Path; url = os.getenv("SHAPER_URL", "http://127.0.0.1:5454"); ready = False; [ (time.sleep(0.5) if not ready else None) for _ in range(60) if not ready and (urllib.request.urlopen(f"{url}/", timeout=2).status < 500 if (lambda: (ready := True))() else False) ]; files = sorted(Path("dashboards").glob("*.sql")); assert files, "No hay archivos .sql en dashboards/"; [ print(f"OK {p.name}:", urllib.request.urlopen(urllib.request.Request(f"{url}/api/dashboards", data=json.dumps({"name": p.stem.replace("_", " ").title(), "content": p.read_text(encoding="utf-8").strip()}).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST"), timeout=10).status) for p in files ]'
 
 dagster-ui:
 	@echo "Abriendo interfaz de Dagster..."
